@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Hello,World!</string>
+    <string name="facebook_app_key">2274674602649435</string>
+    <string name="app_explanation">Say hello to the computer world with this amazing application</string>
+</resources>

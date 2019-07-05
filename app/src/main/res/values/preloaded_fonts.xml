@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/finger_paint</item>
+        <item>@font/josefin_sans</item>
+        <item>@font/josefin_sans_bold</item>
+        <item>@font/merriweather</item>
+        <item>@font/merriweather_bold</item>
+    </array>
+</resources>
