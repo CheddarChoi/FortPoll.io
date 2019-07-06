@@ -4,11 +4,11 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/Tab_2">
+    android:id="@+id/choose_image">
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/image_recycler_view"
+        android:id="@+id/folder_album_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -25,6 +25,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:clickable="true"
+        android:visibility="invisible"
         app:backgroundTint="@android:color/background_light"
         app:layout_constraintBottom_toTopOf="@+id/fab_cam"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,6 +39,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:clickable="true"
+        android:visibility="invisible"
         app:backgroundTint="@android:color/background_light"
         app:layout_constraintBottom_toTopOf="@+id/fab_menu"
         app:layout_constraintEnd_toEndOf="parent"

@@ -3,7 +3,6 @@ package com.example.fake_book.Tab_2;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,16 +22,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fake_book.MainActivity;
 import com.example.fake_book.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -62,13 +57,15 @@ public class Tab_2 extends Fragment {
         View view = inflater.inflate(R.layout.tab_2_main, container, false);
         tedPermission();
 
-        imagelist = new ArrayList<>();
+        imagelist = MainActivity.imagelist;
+
         // 리사이클러뷰에 LinearLayoutManager 객체 지정.
-        final RecyclerView recyclerView = view.findViewById(R.id.image_recycler_view) ;
+        final RecyclerView recyclerView = view.findViewById(R.id.folder_album_recycler_view) ;
         GridLayoutManager mGridLayoutManager;
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(mGridLayoutManager);
         adapter = new CardAdapter(imagelist) ;
+        recyclerView.setAdapter(adapter);
 
         //variables for fab animations
         fab_open = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_open);
@@ -107,17 +104,14 @@ public class Tab_2 extends Fragment {
             }
         });
 
-        recyclerView.setAdapter(adapter);
         return view;
     }
 
     private void tedPermission() {
         PermissionListener permissionlistener = new PermissionListener() {
             @Override
-            public void onPermissionGranted() {
-                // 권한 요청 성공
-                Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_SHORT).show();
-            }
+            public void onPermissionGranted() { }
+
             @Override
             public void onPermissionDenied(List<String> deniedPermissions) {
                 Toast.makeText(getActivity(), "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
@@ -217,6 +211,7 @@ public class Tab_2 extends Fragment {
                 break;
             }
         }
+
         InputStream in = null;
         ExifInterface exif = null;
         try {
@@ -257,5 +252,9 @@ public class Tab_2 extends Fragment {
             fab.startAnimation(fab_rotate);
             isFabOpen = true;
         }
+    }
+
+    public ArrayList<Uri> getImagelist() {
+        return imagelist;
     }
 }

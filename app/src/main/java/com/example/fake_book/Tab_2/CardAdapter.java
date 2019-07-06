@@ -22,7 +22,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     Context context;
 
     //생성자
-    CardAdapter(ArrayList<Uri> list)
+    public CardAdapter(ArrayList<Uri> list)
     {
         this.mData = list ;
         this.cards = new ArrayList<>();

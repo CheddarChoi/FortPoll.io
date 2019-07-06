@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#8BC34A</color>
-    <color name="colorPrimaryDark">#8BC34A</color>
-    <color name="colorAccent">#FF9800</color>
+    <color name="colorPrimary">#28D1A1</color>
+    <color name="colorPrimaryDark">#81134D3F</color>
+    <color name="colorAccent">#F0BA69</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorGray">#AAAAAA</color>
-    <color name="no_number">#000</color>
-    <color name="myTextColor">#AFAFAF</color>
+    <color name="icon_dark">#555555</color>
+    <color name="myTextColor">#EBEBEB</color>
+    <color name="gradient_green">#c2e59c</color>
+    <color name="gradient_blue">#64b3f4</color>
 </resources>

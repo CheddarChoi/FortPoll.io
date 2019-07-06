@@ -9,24 +9,14 @@
     <ImageView
         android:id="@+id/background_image"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:scaleType="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/background" />
-
-    <ImageView
-        android:id="@+id/black"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#808BC34A"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:srcCompat="@drawable/gradient_rotated" />
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/btn_facebook_login"
@@ -120,7 +110,7 @@
         android:text="@string/app_explanation"
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
-        app:fontFamily="@font/josefin_sans"
+        app:fontFamily="@font/raleway"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />

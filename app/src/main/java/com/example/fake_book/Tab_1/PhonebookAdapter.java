@@ -15,9 +15,11 @@ import java.util.ArrayList;
 
 public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.ViewHolder> {
     public ArrayList<Item> mList;
+    int layout_type;
 
-    public PhonebookAdapter(ArrayList<Item> list) {
+    public PhonebookAdapter(ArrayList<Item> list, int layout_type) {
         mList = list;
+        this.layout_type = layout_type;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -32,7 +34,7 @@ public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.View
 
     @Override
     public ViewHolder onCreateViewHolder(@NotNull ViewGroup viewGroup, int viewType) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.listitem_layout, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(layout_type, viewGroup, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
@@ -40,7 +42,8 @@ public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.View
     @Override
     public void onBindViewHolder(@NotNull ViewHolder viewHolder, int position) {
         viewHolder.name.setText(mList.get(position).getName());
-        viewHolder.number.setText(mList.get(position).getNumber());
+        if (layout_type == R.layout.listitem_layout)
+            viewHolder.number.setText(mList.get(position).getNumber());
     }
 
     @Override
