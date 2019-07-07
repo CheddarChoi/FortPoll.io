@@ -23,6 +23,7 @@ public class AddContact extends Activity {
     MaterialEditText edt_email, edt_phoneNumber;
     EditText edt_name;
     Button btn_addcontact;
+    Retrofit retrofitClient;
 
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     MyService myService;
@@ -38,9 +39,6 @@ public class AddContact extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.addcontact);
 
-        Retrofit retrofitClient = RetrofitClient.addcontact_RetrofitInstance();
-        myService = retrofitClient.create(MyService.class);
-
         edt_name = (EditText) findViewById(R.id.edt_name);
         edt_phoneNumber = (MaterialEditText) findViewById(R.id.item_phonenumber);
         edt_email = (MaterialEditText) findViewById(R.id.edt_email);
@@ -51,12 +49,16 @@ public class AddContact extends Activity {
             @Override
             public void onClick(View view) {
                 addContact(edt_name.getText().toString(), edt_phoneNumber.getText().toString(), edt_email.getText().toString());
+
                 finish();
             }
         });
     }
 
     private void addContact(String name, String phoneNumber, String email) {
+        retrofitClient = RetrofitClient.contact_RetrofitInstance();
+        myService = retrofitClient.create(MyService.class);
+
         if(TextUtils.isEmpty(name))
             Toast.makeText(this, "Name cannot be null or Empty", Toast.LENGTH_LONG).show();
         if(TextUtils.isEmpty(phoneNumber))

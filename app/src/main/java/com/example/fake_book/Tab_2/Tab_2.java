@@ -1,10 +1,17 @@
 package com.example.fake_book.Tab_2;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Path;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -17,17 +24,22 @@ import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fake_book.MainActivity;
+import com.example.fake_book.MyService;
 import com.example.fake_book.R;
+import com.example.fake_book.RetrofitClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,32 +47,46 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.http.Url;
+
+import static com.facebook.share.internal.DeviceShareDialogFragment.TAG;
+
 public class Tab_2 extends Fragment {
 
     //variables for fab animation
-    private FloatingActionButton fab, fab_img, fab_cam;
+    private FloatingActionButton fab, fab_upload, fab_download;
     private Animation fab_open, fab_close, fab_rotate, fab_rotate_backward;
     private Boolean isFabOpen = false;
-    ArrayList<Uri> imagelist;
+    public ArrayList<Uri> imagelist;
     private CardAdapter adapter;
+    MyService myService;
 
-    private static final int PICK_FROM_ALBUM = 1;
-    private static final int PICK_FROM_CAMERA= 2;
+    ArrayList<String> fileArray;
 
-    private Uri imgUri, photoURI;
-    private String mCurrentPhotoPath;
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tab_2_main, container, false);
-        tedPermission();
 
         imagelist = new ArrayList<>();
         // 리사이클러뷰에 LinearLayoutManager 객체 지정.
@@ -77,8 +103,8 @@ public class Tab_2 extends Fragment {
         fab_rotate_backward = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_rotate_backward);
 
         fab = view.findViewById(R.id.fab_menu);
-        fab_img = view.findViewById(R.id.fab_img);
-        fab_cam = view.findViewById(R.id.fab_cam);
+        fab_upload = view.findViewById(R.id.fab_upload_from_database);
+        fab_download = view.findViewById(R.id.fab_downloadload_from_database);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,21 +113,47 @@ public class Tab_2 extends Fragment {
             }
         });
 
-        fab_img.setOnClickListener(new View.OnClickListener() {
+        fab_download.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                anim();
-                selectAlbum();
+            public void onClick(View view) {
+                download_Images(new GetImagesCallback(){
+                    @Override
+                    public void onGetImagesData(List<Images> images) {
+                        imagelist.clear();
+
+                        fileArray = new ArrayList<>();
+                        System.out.println(images);
+                        for (Images i : images){
+                            fileArray.add(i.getFilename());
+                        }
+                        System.out.println(fileArray);
+
+                        for(int j=0;j<fileArray.size();j++){
+                            new LoadImage().execute("http://143.248.39.96:3000/getImage/"+fileArray.get(j));
+                            System.out.println("URL is " + "http://143.248.39.96:3000/getImage/"+fileArray.get(j));
+                        }
+
+
+                        adapter.notifyDataSetChanged();
+                    }
+                    @Override
+                    public void onError() {
+                        Log.d(getTag(), "불쌍하니까..");
+                    }
+                });
+
+
                 (adapter).notifyDataSetChanged();
                 recyclerView.smoothScrollToPosition(Integer.MAX_VALUE);
             }
         });
 
-        fab_cam.setOnClickListener(new View.OnClickListener() {
+        fab_upload.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                anim();
-                takePhoto();
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(),addImage.class);
+                startActivityForResult(intent, 1);
+
                 (adapter).notifyDataSetChanged();
                 recyclerView.smoothScrollToPosition(Integer.MAX_VALUE);
             }
@@ -111,151 +163,105 @@ public class Tab_2 extends Fragment {
         return view;
     }
 
-    private void tedPermission() {
-        PermissionListener permissionlistener = new PermissionListener() {
+    public interface GetImagesCallback {
+        void onGetImagesData(List<Images> images);
+        void onError();
+    }
+
+    private void download_Images(final GetImagesCallback getImagesCallback) {
+
+        Retrofit retrofitClient = RetrofitClient.getImages_RetrofitInstance();
+        myService = retrofitClient.create(MyService.class);
+
+        Call<List<Images>> call = myService.getImages();
+        call.enqueue(new Callback<List<Images>>() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
-            public void onPermissionGranted() {
-                // 권한 요청 성공
-                Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_SHORT).show();
+            public void onResponse(@NotNull Call<List<Images>> call, @NotNull Response<List<Images>> response) {
+                if(!response.isSuccessful()){
+
+                    getImagesCallback.onError();
+                    return;
+                }
+                getImagesCallback.onGetImagesData(response.body());
+
+                Toast.makeText(getContext(), "GOT IMAGES SUCCESSFULLY!", Toast.LENGTH_SHORT).show();
             }
+
             @Override
-            public void onPermissionDenied(List<String> deniedPermissions) {
-                Toast.makeText(getActivity(), "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<List<Images>> call, Throwable t) {
+                getImagesCallback.onError();
+                //Something went wrong with the communication with the server or processing the Response or JSON doesn't fit to whatever we are trying to parser into.
+                Toast.makeText(getContext(), "UNSUCCESSFUL!", Toast.LENGTH_SHORT).show();
             }
-        };
-        TedPermission.with(Objects.requireNonNull(getContext()))
-                .setPermissionListener(permissionlistener)
-                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission] ")
-                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
-                .check();
-
+        });
     }
 
-    private void selectAlbum(){
-        //앨범 열기
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-        intent.setType("image/*");
-        startActivityForResult(intent, PICK_FROM_ALBUM);
-    }
-
-    private void takePhoto(){
-        // 촬영 후 이미지 가져옴
-        String state = Environment.getExternalStorageState();
-        if(Environment.MEDIA_MOUNTED.equals(state)){
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if(intent.resolveActivity(getActivity().getPackageManager())!=null){
-                File photoFile = null;
-                try{
-                    photoFile = createImageFile();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                if(photoFile!=null){
-                    Uri providerURI = FileProvider.getUriForFile(getContext(),getActivity().getPackageName(),photoFile);
-                    imgUri = providerURI;
-                    intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, providerURI);
-                    startActivityForResult(intent, PICK_FROM_CAMERA);
-                }
-            }
-        }else{
-            Log.v("알림", "저장공간에 접근 불가능");
-        }
-    }
-
-    private File createImageFile() throws IOException {
-        String imgFileName = System.currentTimeMillis() + ".jpg";
-        File imageFile;
-        File storageDir = new File(Environment.getExternalStorageDirectory() + "/Pictures", "ireh");
-        if(!storageDir.exists()){
-            Log.v("알림","storageDir 존재 x " + storageDir.toString());
-            storageDir.mkdirs();
-        }
-        Log.v("알림","storageDir 존재함 " + storageDir.toString());
-        imageFile = new File(storageDir,imgFileName);
-        mCurrentPhotoPath = imageFile.getAbsolutePath();
-
-        return imageFile;
-
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode != Activity.RESULT_OK){
-            Toast.makeText(getActivity(), "result code: "+ resultCode, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        photoURI = imgUri;
-
-        switch (requestCode){
-            case PICK_FROM_ALBUM : {
-                //앨범에서 가져오기
-                if(data.getData()!=null){
-                    try{
-                        photoURI = data.getData();
-                        //이미지뷰에 이미지 셋팅
-                        if (!imagelist.add(photoURI))
-                            Toast.makeText(getActivity(), "list add failed", Toast.LENGTH_SHORT).show();
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        Log.v("알림","앨범에서 가져오기 에러");
-                    }
-                }
-                break;
-            }
-
-            case PICK_FROM_CAMERA: {
-                try{
-                    Log.v("알림", "FROM_CAMERA 처리");
-                    galleryAddPic();
-                    if (!imagelist.add(imgUri))
-                        Toast.makeText(getActivity(), "list add failed", Toast.LENGTH_SHORT).show();
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-        InputStream in = null;
-        ExifInterface exif = null;
-        try {
-            in = getActivity().getContentResolver().openInputStream(photoURI);
-            exif = new ExifInterface(in);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        adapter.notifyDataSetChanged();
-    }
-
-    private void galleryAddPic(){
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        Objects.requireNonNull(getActivity()).sendBroadcast(mediaScanIntent);
-        Toast.makeText(getContext(),"사진이 저장되었습니다",Toast.LENGTH_SHORT).show();
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
     public void anim() {
         if (isFabOpen) {
-            fab_cam.startAnimation(fab_close);
-            fab_img.startAnimation(fab_close);
-            fab_cam.setClickable(false);
-            fab_img.setClickable(false);
+            fab_upload.startAnimation(fab_close);
+            fab_upload.setClickable(false);
+
+            fab_download.startAnimation(fab_close);
+            fab_download.setClickable(false);
+
             fab.startAnimation(fab_rotate_backward);
             isFabOpen = false;
         } else {
-            fab_cam.startAnimation(fab_open);
-            fab_img.startAnimation(fab_open);
-            fab_cam.setClickable(true);
-            fab_img.setClickable(true);
+            fab_upload.startAnimation(fab_open);
+            fab_upload.setClickable(true);
+
+            fab_download.startAnimation(fab_open);
+            fab_download.setClickable(true);
+
             fab.startAnimation(fab_rotate);
             isFabOpen = true;
         }
     }
+
+    private class LoadImage extends AsyncTask<String, String, Bitmap> {
+
+        ProgressDialog pDialog;
+        Bitmap mBitmap;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(getActivity());
+            pDialog.setMessage("이미지 로딩중입니다...");
+            pDialog.show();
+        }
+
+        protected Bitmap doInBackground(String... args) {
+            try {
+                mBitmap = BitmapFactory
+                        .decodeStream((InputStream) new URL(args[0])
+                                .getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return mBitmap;
+        }
+
+        protected void onPostExecute(Bitmap image) {
+            if (image != null) {
+                System.out.println("URI is " + getImageUri(getContext(),image).toString());
+                imagelist.add(getImageUri(getContext(),image));
+                adapter.notifyDataSetChanged();
+                pDialog.dismiss();
+            } else {
+                pDialog.dismiss();
+                Toast.makeText(getActivity(), "이미지가 존재하지 않습니다.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
+

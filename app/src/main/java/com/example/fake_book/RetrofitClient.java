@@ -9,17 +9,38 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class RetrofitClient {
     private static Retrofit instance;
 
-    public static Retrofit addcontact_RetrofitInstance(){
+    public static Retrofit contact_RetrofitInstance(){
         if( instance == null)
             instance = new Retrofit.Builder()
-                    .baseUrl("http://143.248.39.96:3000/")
+                    .baseUrl("http://143.248.39.96:4000/")
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create())
                     .build();
         return instance;
     }
 
-    public static Retrofit loadContact_RetrofitInstance(){
+    /*public static Retrofit loadContact_RetrofitInstance(){
+        if( instance == null) {
+            instance = new Retrofit.Builder()
+                    .baseUrl("http://143.248.39.96:4000/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return instance;
+    }
+*/
+    public static Retrofit addImages_RetrofitInstance(){
+        if( instance == null) {
+            instance = new Retrofit.Builder()
+                    .baseUrl("http://143.248.39.96:3000/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return instance;
+    }
+
+    public static Retrofit getImages_RetrofitInstance(){
         if( instance == null) {
             instance = new Retrofit.Builder()
                     .baseUrl("http://143.248.39.96:3000/")

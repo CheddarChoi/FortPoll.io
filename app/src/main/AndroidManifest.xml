@@ -28,6 +28,7 @@
 
         <activity android:name=".Tab_1.AddContact">
         </activity>
+        <activity android:name=".Tab_2.addImage" />
 
         <!-- 페이스북 메타데이터 -->
         <meta-data

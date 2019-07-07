@@ -45,6 +45,7 @@ public class Tab_1 extends Fragment {
 
     private static final String TAG = "MainActivity";
 
+    Retrofit retrofit;
     MyService myService;
 
     @Override
@@ -124,7 +125,7 @@ public class Tab_1 extends Fragment {
 
     private void LoadContacts(final GetDataCallback getDataCallback) {
         mContact = new ArrayList<>();
-        Retrofit retrofit = RetrofitClient.loadContact_RetrofitInstance();
+        retrofit = RetrofitClient.contact_RetrofitInstance();
         myService = retrofit.create(MyService.class);
 
         Call<List<Contact>> call = myService.getContacts();
@@ -138,6 +139,7 @@ public class Tab_1 extends Fragment {
                     return;
                 }
                 getDataCallback.onGetContactsData(response.body());
+                call.cancel();
 
 
             }
@@ -148,7 +150,6 @@ public class Tab_1 extends Fragment {
                 Log.d(TAG, t.getMessage());
             }
         });
-
     }
 
 
