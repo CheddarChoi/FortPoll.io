@@ -125,7 +125,7 @@ public class Tab_1 extends Fragment {
 
     private void LoadContacts(final GetDataCallback getDataCallback) {
         mContact = new ArrayList<>();
-        retrofit = RetrofitClient.contact_RetrofitInstance();
+        retrofit = RetrofitClient.ContactsRetrofitInstance();
         myService = retrofit.create(MyService.class);
 
         Call<List<Contact>> call = myService.getContacts();

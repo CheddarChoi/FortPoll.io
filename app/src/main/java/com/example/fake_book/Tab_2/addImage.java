@@ -55,7 +55,7 @@ import retrofit2.http.Multipart;
 
 public class addImage extends AppCompatActivity {
 
-    private Uri imgUri, photoURI;
+    private Uri cameraURI, albumURI;
     private String mCurrentPhotoPath;
 
     Button uploadImage, addImage;
@@ -65,6 +65,8 @@ public class addImage extends AppCompatActivity {
 
     private static final int PICK_FROM_ALBUM = 1;
     private static final int PICK_FROM_CAMERA= 2;
+
+    private static boolean Picked_from_camera = false;
 
     public boolean isPhotoLoaded = false;
 
@@ -97,24 +99,34 @@ public class addImage extends AppCompatActivity {
         addImage.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                if (isPhotoLoaded) {
+                if (albumURI != null) {
                     try {
-                        System.out.println(photoURI);
-                        uploadImage(photoURI);
+                        System.out.println(albumURI);
+                        uploadImage(albumURI);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }else if(cameraURI != null){
+                    try {
+                        System.out.println(cameraURI);
+                        uploadImage(cameraURI);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    Toast.makeText(addImage.this, "No Photo Added!",Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
     private void uploadImage(Uri uri) throws IOException {
-        Retrofit retrofitClient = RetrofitClient.addImages_RetrofitInstance();
+        Retrofit retrofitClient = RetrofitClient.ImagesRetrofitInstance();
         myService = retrofitClient.create(MyService.class);
 
-        File file = new File(getRealPathFromURI(uri));
+        System.out.println(uri);
         System.out.println(getRealPathFromURI(uri));
+        File file = new File(getRealPathFromURI(uri));
         RequestBody req = RequestBody.create(MediaType.parse("image/*"), file);
         String Description = description.getHelperText();
 
@@ -146,18 +158,23 @@ public class addImage extends AppCompatActivity {
         });
     }
     private String getRealPathFromURI(Uri contentURI) {
-        String result;
-        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) { // Source is Dropbox or other similar local file path
-            result = contentURI.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(idx);
-            cursor.close();
+        if(Picked_from_camera = true) {
+            return mCurrentPhotoPath;
+        }else {
+            String result;
+            Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+            if (cursor == null) { // Source is Dropbox or other similar local file path
+                result = contentURI.getPath();
+            } else {
+                cursor.moveToFirst();
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                result = cursor.getString(idx);
+                cursor.close();
+            }
+            return result;
         }
-        return result;
     }
+
 
     public void customDialog(){
             final AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
@@ -239,7 +256,7 @@ public class addImage extends AppCompatActivity {
                 }
                 if(photoFile!=null){
                     Uri providerURI = FileProvider.getUriForFile(addImage.this,addImage.this.getPackageName(),photoFile);
-                    imgUri = providerURI;
+                    cameraURI = providerURI;
                     intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, providerURI);
                     startActivityForResult(intent, PICK_FROM_CAMERA);
                 }
@@ -272,23 +289,22 @@ public class addImage extends AppCompatActivity {
             Toast.makeText(addImage.this, "result code: "+ resultCode, Toast.LENGTH_SHORT).show();
             return;
         }
-
+        albumURI = cameraURI;
         switch (requestCode){
             case PICK_FROM_ALBUM : {
                 //앨범에서 가져오기
                 if(data.getData()!=null){
-                    photoURI = data.getData();
+                    albumURI = data.getData();
                 }
                 break;
             }
 
             case PICK_FROM_CAMERA: {
                 try{
-                    if(data.getData() != null)
-                        imgUri = data.getData();
-                        photoURI = imgUri;
                     Log.v("알림", "FROM_CAMERA 처리");
-                    if (!uploadedPhotos.add(imgUri))
+                    galleryAddPic();
+                    Picked_from_camera = true;
+                    if (!uploadedPhotos.add(cameraURI))
                         Toast.makeText(addImage.this, "list add failed", Toast.LENGTH_SHORT).show();
                 }catch (Exception e){
                     e.printStackTrace();
@@ -298,14 +314,14 @@ public class addImage extends AppCompatActivity {
         }
 
         try {
-            InputStream in = addImage.this.getContentResolver().openInputStream(photoURI);
+            InputStream in = addImage.this.getContentResolver().openInputStream(albumURI);
             ExifInterface exif = new ExifInterface(in);
 
             if (!isPhotoLoaded){
                 return;
             }else{
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), photoURI);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), albumURI);
                     uploadImage.setVisibility(View.INVISIBLE);
                     loadedPhoto.setImageBitmap(bitmap);
                 } catch (IOException e) {

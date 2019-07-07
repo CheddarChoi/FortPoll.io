@@ -170,7 +170,7 @@ public class Tab_2 extends Fragment {
 
     private void download_Images(final GetImagesCallback getImagesCallback) {
 
-        Retrofit retrofitClient = RetrofitClient.getImages_RetrofitInstance();
+        Retrofit retrofitClient = RetrofitClient.ImagesRetrofitInstance();
         myService = retrofitClient.create(MyService.class);
 
         Call<List<Images>> call = myService.getImages();

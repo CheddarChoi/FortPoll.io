@@ -56,7 +56,7 @@ public class AddContact extends Activity {
     }
 
     private void addContact(String name, String phoneNumber, String email) {
-        retrofitClient = RetrofitClient.contact_RetrofitInstance();
+        retrofitClient = RetrofitClient.ContactsRetrofitInstance();
         myService = retrofitClient.create(MyService.class);
 
         if(TextUtils.isEmpty(name))
