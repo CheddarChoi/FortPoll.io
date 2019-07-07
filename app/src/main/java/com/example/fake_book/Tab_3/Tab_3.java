@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fake_book.MainActivity;
 import com.example.fake_book.R;
 import com.example.fake_book.Tab_1.Item;
-import com.example.fake_book.Tab_1.PhonebookDetail;
 import com.example.fake_book.Tab_1.RecyclerItemClickListener;
 
 import java.util.ArrayList;

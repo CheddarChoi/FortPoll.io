@@ -58,4 +58,7 @@ dependencies {
 
     //face recognition
     implementation 'com.google.android.gms:play-services-vision:18.0.0'
+
+    //pull to refresh
+    implementation 'com.android.support:design'
 }

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,10 +24,14 @@ import com.example.fake_book.Tab_2.Tab_2;
 import com.example.fake_book.Tab_3.Tab_3;
 import com.facebook.login.LoginManager;
 import com.google.android.material.tabs.TabLayout;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     public static Context mContext;
@@ -40,13 +45,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         phonebooklist = new ArrayList<>();
         imagelist = new ArrayList<>();
-        //for test
-        phonebooklist.add(new Item("CheddarChoi", "010-2796-5866", "cde1103@kaist.ac.kr", new ArrayList<Uri>()));
-        phonebooklist.add(new Item("Bob", "010-2134-4778", "helloworld@kaist.ac.kr", new ArrayList<Uri>()));
-        phonebooklist.add(new Item("Vinny", "010-4464-7789", "niceVinny@kaist.ac.kr", new ArrayList<Uri>()));
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        tedPermission();
 
         // Get the ActionBar here to configure the way it behaves.
         ActionBar actionBar = getSupportActionBar();
@@ -127,5 +130,23 @@ public class MainActivity extends AppCompatActivity {
         }else if(System.currentTimeMillis()-time<2000){
             ActivityCompat.finishAffinity(MainActivity.this);
         }
+    }
+
+    private void tedPermission() {
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() { }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+            }
+        };
+        TedPermission.with(Objects.requireNonNull(getApplicationContext()))
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission] ")
+                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,Manifest.permission.READ_CALL_LOG, Manifest.permission.READ_SMS)
+                .check();
+
     }
 }

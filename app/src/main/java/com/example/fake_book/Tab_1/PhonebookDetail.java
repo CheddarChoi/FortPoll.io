@@ -49,6 +49,7 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setElevation(0);
         actionBar.setTitle("Contact Detail");
+        actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.gradient));
 
         textView_name = findViewById(R.id.edit_name);
         textView_number = findViewById(R.id.edit_number);

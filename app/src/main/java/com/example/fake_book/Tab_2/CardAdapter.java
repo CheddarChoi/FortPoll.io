@@ -39,7 +39,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             card.img.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-
                     if (!card.clicked) {
                         card.clicked = true;
                         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
@@ -70,9 +69,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 }
             });
         }
-
     }
-
 
     @NonNull
     @Override
@@ -81,8 +78,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) ;
 
         View view = inflater.inflate(R.layout.card, parent, false) ;
-
-
 
         return new CardAdapter.ViewHolder(view) ;
     }

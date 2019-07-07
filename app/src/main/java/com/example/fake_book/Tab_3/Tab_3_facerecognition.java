@@ -1,14 +1,11 @@
 package com.example.fake_book.Tab_3;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,9 +27,7 @@ import com.example.fake_book.MainActivity;
 import com.example.fake_book.R;
 import com.example.fake_book.Tab_1.Item;
 import com.example.fake_book.Tab_1.PhonebookAdapter;
-import com.example.fake_book.Tab_1.PhonebookDetail;
 import com.example.fake_book.Tab_1.RecyclerItemClickListener;
-import com.example.fake_book.Tab_1.Tab_1;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
@@ -56,8 +51,6 @@ public class Tab_3_facerecognition extends AppCompatActivity {
     ImageView image;
     int index = 0;
     int STROKE_WIDTH, TEXT_SIZE;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

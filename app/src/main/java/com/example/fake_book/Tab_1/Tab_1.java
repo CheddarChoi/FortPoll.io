@@ -1,27 +1,23 @@
 package com.example.fake_book.Tab_1;
 
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.fake_book.MainActivity;
 import com.example.fake_book.MyService;
@@ -34,13 +30,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class Tab_1 extends Fragment {
+public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private PhonebookAdapter phonebookadapter;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
@@ -48,20 +43,26 @@ public class Tab_1 extends Fragment {
     ArrayList<Item> phonebooklist;
 
     private FloatingActionButton add_contacts, deleteAll;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private static final String TAG = "MainActivity";
 
     MyService myService;
+    Retrofit retrofit;
+
+    final int ADD_CONTACT = 1000;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate:started.");
-
-        View rootView = inflater.inflate(R.layout.tab_1_main, container, false);
-
+        View view = inflater.inflate(R.layout.tab_1_main, container, false);
         phonebooklist = MainActivity.phonebooklist;
 
-        mRecyclerView = rootView.findViewById(R.id.recycler_view);
+        LoadContacts();
+
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        mRecyclerView = view.findViewById(R.id.recycler_view);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
 
@@ -113,43 +114,30 @@ public class Tab_1 extends Fragment {
             }
         }));
 
-        add_contacts = rootView.findViewById(R.id.add_contact);
-        deleteAll = rootView.findViewById(R.id.deleteAll);
+        add_contacts = view.findViewById(R.id.add_contact);
+        deleteAll = view.findViewById(R.id.deleteAll);
         deleteAll.hide();
-
-        //load contacts from db
-        //phonebooklist.clear();
-        LoadContacts(new GetDataCallback() {
-            @Override
-            public void onGetContactsData(List<Contact> contacts) {
-                assert contacts != null;
-                Resources resources = getContext().getResources();
-                for(Contact c : contacts){
-                    mContact.add(new Contact(c.getName(), c.getPhoneNumber(), c.getEmail()));
-                    final Uri new_image = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" + R.drawable.island);
-                    ArrayList<Uri> photolist = new ArrayList<>();
-                    photolist.add(new_image);
-                    phonebooklist.add(new Item(c.getName(), c.getPhoneNumber(), c.getEmail(), photolist));
-                }
-                Log.d(TAG, "ALL CONTACTS LOADED");
-                phonebookadapter.notifyDataSetChanged();
-            }
-            @Override
-            public void onError() {
-                Log.d(TAG, "불쌍하니까..");
-            }
-        });
-        //
 
         add_contacts.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 Intent intent = new Intent(getActivity(), AddContact.class);
-                startActivityForResult(intent,1);
+                startActivityForResult(intent,ADD_CONTACT);
             }
         });
 
-        return rootView;
+        return view;
+    }
+
+    @Override
+    public void onRefresh() {
+        mRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                LoadContacts();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        },500);
     }
 
     public interface GetDataCallback {
@@ -157,9 +145,31 @@ public class Tab_1 extends Fragment {
         void onError();
     }
 
-    private void LoadContacts(final GetDataCallback getDataCallback) {
+    private void LoadContacts() {
+        phonebooklist.clear();
+        LoadContactsConnect(new GetDataCallback() {
+            @Override
+            public void onGetContactsData(List<Contact> contacts) {
+                assert contacts != null;
+                for(Contact c : contacts){
+                    System.out.println(c.getEmail()+" "+c.getName()+" "+c.getPhoneNumber());
+                    mContact.add(new Contact(c.getName(), c.getPhoneNumber(), c.getEmail()));
+                    System.out.println(mContact.size());
+                    phonebooklist.add(new Item(c.getName(), c.getPhoneNumber(), c.getEmail(), new ArrayList<Uri>()));
+                    phonebookadapter.notifyDataSetChanged();
+                }
+                Log.d(TAG, "ALL CONTACTS LOADED");
+            }
+            @Override
+            public void onError() {
+                Log.d(TAG, "Error while loading contacts..");
+            }
+        });
+    }
+
+    private void LoadContactsConnect(final GetDataCallback getDataCallback) {
         mContact = new ArrayList<>();
-        Retrofit retrofit = RetrofitClient.loadContact_RetrofitInstance();
+        retrofit = RetrofitClient.ContactsRetrofitInstance();
         myService = retrofit.create(MyService.class);
 
         Call<List<Contact>> call = myService.getContacts();
@@ -167,14 +177,13 @@ public class Tab_1 extends Fragment {
         call.enqueue(new Callback<List<Contact>>() {
             @Override
             public void onResponse(@NotNull Call<List<Contact>> call, @NotNull Response<List<Contact>> response) {
-                if (!response.isSuccessful()) {
+                if(!response.isSuccessful()){
                     getDataCallback.onError();
-                    Log.d(TAG, "xlxlxl" + response.code());
+                    Log.d(TAG, "xlxlxl"+response.code());
                     return;
                 }
                 getDataCallback.onGetContactsData(response.body());
-
-
+                call.cancel();
             }
 
             @Override
@@ -184,7 +193,17 @@ public class Tab_1 extends Fragment {
                 Log.d(TAG, t.getMessage());
             }
         });
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch(resultCode) {
+            case ADD_CONTACT: {
+                LoadContacts();
+                phonebookadapter.notifyDataSetChanged();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
 

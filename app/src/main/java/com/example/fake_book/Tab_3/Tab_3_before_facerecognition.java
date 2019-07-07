@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -29,20 +30,21 @@ import com.example.fake_book.Tab_1.Item;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class Tab_3_before_facerecognition extends AppCompatActivity {
 
-    Button start_button, prev_button, next_button, complete_button;
+    Button start_button;
+    FloatingActionButton rotate_button;
     ImageView image;
     Context context;
-    Canvas tempCanvas;
-    Paint myRectPaint;
-    Bitmap tempBitmap;
     boolean isPhotoLoaded = false;
+    Bitmap bm;
 
     ArrayList<Item> phonebooklist = MainActivity.phonebooklist;
 
@@ -62,9 +64,7 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
 
         setContentView(R.layout.tab_3_before_recognition);
         start_button = findViewById(R.id.start_button);
-        prev_button = findViewById(R.id.prev_button);
-        next_button = findViewById(R.id.next_button);
-        complete_button = findViewById(R.id.complete_button);
+        rotate_button = findViewById(R.id.rotate_button);
         image = findViewById(R.id.imageView_recognition);
 
         image.setOnClickListener(new View.OnClickListener() {
@@ -87,6 +87,14 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
                     Toast.makeText(Tab_3_before_facerecognition.this,"Load Photo First!",Toast.LENGTH_LONG).show();
             }
         });
+
+        rotate_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bm = imgRotate(bm);
+                image.setImageBitmap(bm);
+            }
+        });
     }
 
 
@@ -98,7 +106,7 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK) {
                     selected_image_uri = Uri.parse(data.getStringExtra("photo_uri"));
                     try {
-                        Bitmap bm = MediaStore.Images.Media.getBitmap(getContentResolver(), selected_image_uri);
+                        bm = MediaStore.Images.Media.getBitmap(getContentResolver(), selected_image_uri);
                         image.setImageBitmap(bm);
                         isPhotoLoaded = true;
                     } catch (FileNotFoundException e) {
@@ -124,5 +132,26 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    private Bitmap imgRotate(Bitmap bmp){
+        int width = bmp.getWidth();
+        int height = bmp.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+
+        Bitmap resizedBitmap = Bitmap.createBitmap(bmp, 0, 0, width, height, matrix, true);
+        bmp.recycle();
+
+        OutputStream os = null;
+        try {
+            os = getApplicationContext().getContentResolver().openOutputStream(selected_image_uri);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        resizedBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
+
+        return resizedBitmap;
     }
 }
