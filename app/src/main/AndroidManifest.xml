@@ -15,7 +15,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/team_icon_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:networkSecurityConfig="@xml/network">
         <activity android:name=".Tab_3.FolderAlbum"
             android:configChanges="keyboardHidden|orientation"/>
         <activity android:name=".Tab_3.Tab_3_facerecognition"

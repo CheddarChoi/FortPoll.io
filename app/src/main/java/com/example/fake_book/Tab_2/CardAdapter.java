@@ -2,7 +2,10 @@ package com.example.fake_book.Tab_2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fake_book.R;
+import com.example.fake_book.Tab_1.AddContact;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
@@ -22,10 +27,11 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     Context context;
 
     //생성자
-    public CardAdapter(ArrayList<Uri> list)
+    public CardAdapter(ArrayList<Uri> list, Context context)
     {
         this.mData = list ;
         this.cards = new ArrayList<>();
+        this.context = context;
 
     }
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -84,7 +90,18 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CardAdapter.ViewHolder holder, int position) {
-        holder.card.img.setImageURI(this.mData.get(position));
+
+        Uri selected_photo_uri = this.mData.get(position);
+        System.out.println(selected_photo_uri);
+
+        Bitmap bitmap = Bitmap.createBitmap(200,200,Bitmap.Config.ARGB_8888);
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), selected_photo_uri);
+        } catch (IOException e) {
+            System.out.println("image안됨");
+        }
+        Bitmap resized = Bitmap.createScaledBitmap(bitmap, 200, bitmap.getHeight()*200/bitmap.getWidth(), true);
+        holder.card.img.setImageBitmap(resized);
         holder.card.index = position;
         holder.card.uri = this.mData.get(position);
     }

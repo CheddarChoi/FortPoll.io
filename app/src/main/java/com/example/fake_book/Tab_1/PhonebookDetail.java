@@ -39,8 +39,8 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
         name = getIntent().getStringExtra("name");
         number = getIntent().getStringExtra("number");
         email = getIntent().getStringExtra("email");
-        /*bytes = getIntent().getByteArrayExtra("photo");
-        photo = BitmapFactory.decodeByteArray(bytes,0,bytes.length);*/
+        bytes = getIntent().getByteArrayExtra("photo");
+        photo = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
 
         // Get the ActionBar here to configure the way it behaves.
         ActionBar actionBar = getSupportActionBar();
@@ -54,7 +54,7 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
         textView_name = findViewById(R.id.edit_name);
         textView_number = findViewById(R.id.edit_number);
         textView_email = findViewById(R.id.edit_email);
-        /*ImageView_photo = findViewById(R.id.imageView_phonebook);*/
+        ImageView_photo = findViewById(R.id.imageView_phonebook);
         callbutton = findViewById(R.id.callButton);
         messagebutton = findViewById(R.id.messageButton);
         emailbutton = findViewById(R.id.emailButton);
@@ -66,7 +66,7 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
         textView_name.setText(name);
         textView_number.setText(number);
         textView_email.setText(email);
-        /*ImageView_photo.setImageBitmap(photo);*/
+        ImageView_photo.setImageBitmap(photo);
 
         if (email.length() == 0){
             emailbutton.setVisibility(View.INVISIBLE);

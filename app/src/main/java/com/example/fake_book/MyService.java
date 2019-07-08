@@ -1,8 +1,7 @@
 package com.example.fake_book;
 
 import com.example.fake_book.Tab_1.Contact;
-import com.example.fake_book.Tab_2.Image;
-import com.example.fake_book.Tab_2.Images;
+import com.example.fake_book.Tab_2.Image_list;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
-import retrofit2.http.Path;
+
 public interface MyService {
     @POST("addContact")
     @FormUrlEncoded
@@ -28,12 +27,13 @@ public interface MyService {
     Call<List<Contact>> getContacts();
 
     @Multipart
+    @POST("addContactImage")
+    Call<ResponseBody> addContactImage (@Part MultipartBody.Part image);
+
+    @Multipart
     @POST("upload")
     Call<ResponseBody> addNewImage (@Part MultipartBody.Part image);
 
     @GET("getImages")
-    Call<List<Images>> getImages();
-
-    @GET("getImage/:{filename}")
-    Call<Image> getImage(@Path("filename") String imageName);
+    Call<List<Image_list>> getImages();
 }

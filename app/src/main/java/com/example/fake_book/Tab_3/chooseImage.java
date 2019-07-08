@@ -42,7 +42,7 @@ public class chooseImage extends AppCompatActivity {
         GridLayoutManager mGridLayoutManager;
         mGridLayoutManager = new GridLayoutManager(chooseImage.this, 3);
         recyclerView.setLayoutManager(mGridLayoutManager);
-        adapter = new CardAdapter(imagelist);
+        adapter = new CardAdapter(imagelist, getApplicationContext());
         recyclerView.setAdapter(adapter);
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(chooseImage.this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override

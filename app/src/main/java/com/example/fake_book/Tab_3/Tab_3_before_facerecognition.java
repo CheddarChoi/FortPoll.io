@@ -35,7 +35,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -99,6 +101,22 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
 
                 bitmap = imgRotate(bitmap);
                 image.setImageBitmap(bitmap);
+
+                File rotated_file = new File(selected_image_uri.getPath());
+                OutputStream out = null;
+                try {
+                    rotated_file.createNewFile();
+                    out = new FileOutputStream(rotated_file);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
     }

@@ -3,6 +3,7 @@ package com.example.fake_book.Tab_1;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,10 +26,12 @@ public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.View
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView name;
         public TextView number;
+        public ImageView profile_image;
         public ViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.item_name);
             number = view.findViewById(R.id.item_phonenumber);
+            profile_image = view.findViewById(R.id.image);
         }
     }
 
@@ -44,6 +47,7 @@ public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.View
         viewHolder.name.setText(mList.get(position).getName());
         if (layout_type == R.layout.listitem_layout)
             viewHolder.number.setText(mList.get(position).getNumber());
+        viewHolder.profile_image.setImageBitmap(mList.get(position).getProfile_pic());
     }
 
     @Override

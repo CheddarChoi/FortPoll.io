@@ -2,11 +2,11 @@ package com.example.fake_book.Tab_2;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Images {
+public class Image_list {
     @SerializedName("filename")
     private String filename;
 
-    public Images(String filename){
+    public Image_list(String filename){
         this.filename = filename;
     }
 

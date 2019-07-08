@@ -1,18 +1,21 @@
 package com.example.fake_book.Tab_1;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 import java.util.ArrayList;
 
 public class Item {
     private String name, number, email;
+    private Bitmap profile_pic;
     private ArrayList<Uri> photos;
 
-    public Item(String name, String number, String email, ArrayList<Uri> photos) {
+    public Item(String name, String number, String email, Bitmap profile_pic) {
         this.name = name;
         this.number = number;
         this.email = email;
-        this.photos = photos;
+        this.profile_pic = profile_pic;
+        this.photos = new ArrayList<>();
     }
 
     public String getName() {
@@ -49,5 +52,13 @@ public class Item {
 
     public void addPhoto(Uri photo){
         this.photos.add(photo);
+    }
+
+    public Bitmap getProfile_pic() {
+        return profile_pic;
+    }
+
+    public void setProfile_pic(Bitmap profile_pic) {
+        this.profile_pic = profile_pic;
     }
 }

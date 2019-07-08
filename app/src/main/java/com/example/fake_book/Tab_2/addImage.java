@@ -1,6 +1,5 @@
 package com.example.fake_book.Tab_2;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentUris;
@@ -9,18 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -33,20 +27,12 @@ import androidx.exifinterface.media.ExifInterface;
 import com.example.fake_book.MyService;
 import com.example.fake_book.R;
 import com.example.fake_book.RetrofitClient;
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.TedPermission;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.interfaces.DSAKey;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -56,7 +42,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.http.Multipart;
 
 public class addImage extends AppCompatActivity {
 
@@ -89,7 +74,7 @@ public class addImage extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setElevation(0);
         actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.gradient));
-        actionBar.setTitle("Add Images");
+        actionBar.setTitle("Add Image_list");
 
         loadedPhoto = findViewById(R.id.photoLoaded);
         addImage = findViewById(R.id.btn_addImage);
@@ -217,25 +202,15 @@ public class addImage extends AppCompatActivity {
             }
         }
 
-        try {
-            InputStream in = addImage.this.getContentResolver().openInputStream(loadedPhoto_uri);
-            ExifInterface exif = new ExifInterface(in);
-
-            if (!isPhotoLoaded){
-                return;
-            }else{
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), loadedPhoto_uri);
-                    loadedPhoto.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        if (!isPhotoLoaded) {
+            return;
+        } else {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), loadedPhoto_uri);
+                loadedPhoto.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

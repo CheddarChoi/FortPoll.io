@@ -43,7 +43,7 @@ public class FolderAlbum extends AppCompatActivity {
         GridLayoutManager mGridLayoutManager;
         mGridLayoutManager = new GridLayoutManager(FolderAlbum.this, 3);
         folder_album_recycler_view.setLayoutManager(mGridLayoutManager);
-        adapter = new CardAdapter(folder_imagelist) ;
+        adapter = new CardAdapter(folder_imagelist, getApplicationContext()) ;
         folder_album_recycler_view.setAdapter(adapter);
 
         // Get the ActionBar here to configure the way it behaves.

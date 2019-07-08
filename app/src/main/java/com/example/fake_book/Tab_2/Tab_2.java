@@ -1,9 +1,7 @@
 package com.example.fake_book.Tab_2;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,8 +10,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +19,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,21 +29,16 @@ import com.example.fake_book.MyService;
 import com.example.fake_book.R;
 import com.example.fake_book.RetrofitClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.TedPermission;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,7 +62,6 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
     private final int PICK_FROM_CAMERA= 2;
 
     private Uri imgUri, photoURI;
-    private String mCurrentPhotoPath;
     MyService myService;
 
     @Nullable
@@ -92,7 +81,7 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
         GridLayoutManager mGridLayoutManager;
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(mGridLayoutManager);
-        adapter = new CardAdapter(imagelist) ;
+        adapter = new CardAdapter(imagelist, getContext()) ;
         recyclerView.setAdapter(adapter);
 
         //variables for fab animations
@@ -192,7 +181,7 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
     }
 
     public interface GetImagesCallback {
-        void onGetImagesData(List<Images> images);
+        void onGetImagesData(List<Image_list> images);
         void onError();
     }
 
@@ -211,11 +200,11 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
         imagelist.clear();
         load_Images(new GetImagesCallback(){
             @Override
-            public void onGetImagesData(List<Images> images) {
+            public void onGetImagesData(List<Image_list> images) {
                 imagelist.clear();
 
                 fileArray = new ArrayList<>();
-                for (Images i : images)
+                for (Image_list i : images)
                     fileArray.add(i.getFilename());
 
                 for(int j=0 ; j < fileArray.size() ; j++){
@@ -241,11 +230,11 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
         Retrofit retrofitClient = RetrofitClient.ImagesRetrofitInstance();
         myService = retrofitClient.create(MyService.class);
 
-        Call<List<Images>> call = myService.getImages();
-        call.enqueue(new Callback<List<Images>>() {
+        Call<List<Image_list>> call = myService.getImages();
+        call.enqueue(new Callback<List<Image_list>>() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
-            public void onResponse(@NotNull Call<List<Images>> call, @NotNull Response<List<Images>> response) {
+            public void onResponse(@NotNull Call<List<Image_list>> call, @NotNull Response<List<Image_list>> response) {
                 if(!response.isSuccessful()){
                     getImagesCallback.onError();
                     return;
@@ -254,7 +243,7 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
             }
 
             @Override
-            public void onFailure(Call<List<Images>> call, Throwable t) {
+            public void onFailure(Call<List<Image_list>> call, Throwable t) {
                 getImagesCallback.onError();
             }
         });

@@ -2,7 +2,10 @@ package com.example.fake_book.Tab_1;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +30,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,13 +46,13 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
     private PhonebookAdapter phonebookadapter;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
-    ArrayList<Contact> mContact;
     ArrayList<Item> phonebooklist;
+    ArrayList<Bitmap> phonebookPhotolist;
 
     private FloatingActionButton add_contacts, deleteAll;
     SwipeRefreshLayout swipeRefreshLayout;
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "TAB_1";
 
     MyService myService;
     Retrofit retrofit;
@@ -56,8 +63,7 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tab_1_main, container, false);
         phonebooklist = MainActivity.phonebooklist;
-
-        LoadContacts();
+        phonebookPhotolist = new ArrayList<>();
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -81,11 +87,11 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
                 detail_intent.putExtra("number", phonebooklist.get(position).getNumber());
                 detail_intent.putExtra("email", phonebooklist.get(position).getEmail());
 
-/*                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                Bitmap bmp = phonebooklist.get(position).getPhoto();
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                Bitmap bmp = phonebooklist.get(position).getProfile_pic();
                 bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] bytes = stream.toByteArray();
-                detail_intent.putExtra("photo", bytes);*/
+                detail_intent.putExtra("photo", bytes);
 
                 startActivityForResult(detail_intent, 1);
             }
@@ -126,6 +132,8 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
             }
         });
 
+        LoadContacts();
+
         return view;
     }
 
@@ -145,6 +153,11 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
         void onError();
     }
 
+    public interface GetContactImagesCallback{
+        void onGetContactImagesData(Bitmap photos);
+        void onError();
+    }
+
     private void LoadContacts() {
         phonebooklist.clear();
         LoadContactsConnect(new GetDataCallback() {
@@ -152,23 +165,29 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
             public void onGetContactsData(List<Contact> contacts) {
                 assert contacts != null;
                 for(Contact c : contacts){
-                    System.out.println(c.getEmail()+" "+c.getName()+" "+c.getPhoneNumber());
-                    mContact.add(new Contact(c.getName(), c.getPhoneNumber(), c.getEmail()));
-                    System.out.println(mContact.size());
-                    phonebooklist.add(new Item(c.getName(), c.getPhoneNumber(), c.getEmail(), new ArrayList<Uri>()));
-                    phonebookadapter.notifyDataSetChanged();
+                    Item new_item = new Item(c.getName(), c.getPhoneNumber(), c.getEmail(),
+                            ((BitmapDrawable)getResources().getDrawable(R.drawable.island)).getBitmap());
+                    phonebooklist.add(new_item);
+                    LoadImages(new_item.getNumber(), phonebooklist.indexOf(new_item), new GetContactImagesCallback() {
+                        @Override
+                        public void onGetContactImagesData(Bitmap photos) {
+                        }
+                        @Override
+                        public void onError() {
+                        }
+                    });
                 }
                 Log.d(TAG, "ALL CONTACTS LOADED");
+                phonebookadapter.notifyDataSetChanged();
             }
             @Override
             public void onError() {
-                Log.d(TAG, "Error while loading contacts..");
+                Log.d(TAG, "불쌍하니까..");
             }
         });
     }
 
     private void LoadContactsConnect(final GetDataCallback getDataCallback) {
-        mContact = new ArrayList<>();
         retrofit = RetrofitClient.ContactsRetrofitInstance();
         myService = retrofit.create(MyService.class);
 
@@ -194,6 +213,39 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
             }
         });
     }
+
+    public void LoadImages(String phoneNumber, int index, final GetContactImagesCallback getContactImagesCallback){
+        new contactPhoto().execute("http://143.248.39.96:4000/getContactImage/"+ phoneNumber +".jpg", ""+index);
+    }
+
+    private class contactPhoto extends AsyncTask<String, String, Bitmap> {
+        Bitmap mBitmap;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+        protected Bitmap doInBackground(String... args) {
+            try {
+                mBitmap = BitmapFactory
+                        .decodeStream((InputStream) new URL(args[0])
+                                .getContent());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int index = Integer.parseInt(args[1]);
+
+            Bitmap resized = Bitmap.createScaledBitmap(mBitmap, 200, mBitmap.getHeight()*200/mBitmap.getWidth(), true);
+            phonebooklist.get(index).setProfile_pic(resized);
+
+            return mBitmap;
+        }
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            phonebookadapter.notifyDataSetChanged();
+        }
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
