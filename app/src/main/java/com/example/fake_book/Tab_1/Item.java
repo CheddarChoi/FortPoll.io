@@ -6,11 +6,11 @@ public class Item {
     private String name, number, email;
     private Bitmap profile_pic;
 
-    public Item(String name, String number, String email, Bitmap profile_pic) {
+    public Item(String name, String number, String email) {
         this.name = name;
         this.number = number;
         this.email = email;
-        this.profile_pic = profile_pic;
+        this.profile_pic = null;
     }
 
     public Bitmap getProfile_pic() {
@@ -39,5 +39,9 @@ public class Item {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setProfile_pic(Bitmap profile_pic) {
+        this.profile_pic = profile_pic;
     }
 }

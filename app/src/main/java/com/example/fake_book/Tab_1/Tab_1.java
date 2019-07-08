@@ -1,8 +1,14 @@
 package com.example.fake_book.Tab_1;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +29,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +48,7 @@ public class Tab_1 extends Fragment {
     private LinearLayoutManager mLinearLayoutManager;
     ArrayList<Contact> mContact;
     ArrayList<Item> phonebooklist;
+    ArrayList<Bitmap> phonebookPhotolist;
 
     private FloatingActionButton menu, read_contacts, add_contacts, deleteAll;
     boolean isMenuOpen = false;
@@ -55,12 +65,13 @@ public class Tab_1 extends Fragment {
         View rootView = inflater.inflate(R.layout.tab_1_main, container, false);
 
         phonebooklist = new ArrayList<>();
+        phonebookPhotolist = new ArrayList<>();
 
         mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
 
-        phonebookadapter = new PhonebookAdapter(phonebooklist);
+        phonebookadapter = new PhonebookAdapter(getContext(),phonebooklist);
         mRecyclerView.setAdapter(phonebookadapter);
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(), mLinearLayoutManager.getOrientation());
@@ -83,15 +94,20 @@ public class Tab_1 extends Fragment {
             @Override
             public void onClick(View view){
                 phonebooklist.clear();
+                phonebookPhotolist.clear();
                 LoadContacts(new GetDataCallback() {
                     @Override
                     public void onGetContactsData(List<Contact> contacts) {
                         assert contacts != null;
-                        for(Contact c : contacts){
+                        for(int i = 0; i<contacts.size() ; i++){
+                            Contact c = contacts.get(i);
                             System.out.println(c.getEmail()+" "+c.getName()+" "+c.getPhoneNumber());
                             mContact.add(new Contact(c.getName(), c.getPhoneNumber(), c.getEmail()));
                             System.out.println(mContact.size());
-                            phonebooklist.add(new Item(c.getName(), c.getPhoneNumber(), c.getEmail()));
+                            Item new_item =new Item(c.getName(), c.getPhoneNumber(), c.getEmail());
+                            /*new contactPhoto().execute("http://143.248.39.96:4000/getImage/"+c.getPhoneNumber()+".jpg");
+                            new_item.setProfile_pic(phonebookPhotolist.get(i));*/
+                            phonebooklist.add(new_item);
                         }
                         Log.d(TAG, "ALL CONTACTS LOADED");
                         phonebookadapter.notifyDataSetChanged();
@@ -138,8 +154,8 @@ public class Tab_1 extends Fragment {
                     Log.d(TAG, "xlxlxl"+response.code());
                     return;
                 }
+                Log.d(TAG, "여기는 되는데");
                 getDataCallback.onGetContactsData(response.body());
-                call.cancel();
 
 
             }
@@ -147,10 +163,42 @@ public class Tab_1 extends Fragment {
             public void onFailure(Call<List<Contact>> call, Throwable t) {
                 getDataCallback.onError();
                 //Something went wrong with the communication with the server or processing the Response or JSON doesn't fit to whatever we are trying to parser into.
-                Log.d(TAG, t.getMessage());
+                Log.d(TAG, "뭐야 왜 안돼");
             }
         });
     }
+
+    /*private class contactPhoto extends AsyncTask<String, String, Bitmap> {
+
+        Bitmap mBitmap;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        protected Bitmap doInBackground(String... args) {
+            try {
+                mBitmap = BitmapFactory
+                        .decodeStream((InputStream) new URL(args[0])
+                                .getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return mBitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            phonebookPhotolist.add(bitmap);
+            int index = phonebookPhotolist.size();
+            Item item = phonebooklist.get(index);
+            item.setProfile_pic(bitmap);
+            phonebooklist.set(index, item);
+        }
+    }*/
 
 
     private void menuOpen(){

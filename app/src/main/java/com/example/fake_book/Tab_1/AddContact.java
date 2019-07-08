@@ -148,7 +148,6 @@ public class AddContact extends Activity {
 
         RequestBody req = RequestBody.create(MediaType.parse("image/*"), file);
 
-
         //Setting file name to unique name (phone number, is most likely unique) + file extension
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", edt_phoneNumber.getText().toString() + file.getName().substring(file.getName().lastIndexOf(".")), req);
 
