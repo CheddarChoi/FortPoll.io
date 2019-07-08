@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -165,8 +166,18 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
             public void onGetContactsData(List<Contact> contacts) {
                 assert contacts != null;
                 for(Contact c : contacts){
+                    ArrayList<Uri> photo_uri_list = new ArrayList<>();
+                    if (c.getPhotoPaths() != null) {
+                        System.out.println("Uri list is not null for "+c.getName());
+                        for (String s : c.getPhotoPaths()) {
+                            if (s != null) {
+                                System.out.println("uri string : " + s);
+                                photo_uri_list.add(Uri.parse(s));
+                            }
+                        }
+                    }
                     Item new_item = new Item(c.getName(), c.getPhoneNumber(), c.getEmail(),
-                            ((BitmapDrawable)getResources().getDrawable(R.drawable.island)).getBitmap());
+                            ((BitmapDrawable)getResources().getDrawable(R.drawable.island)).getBitmap(), photo_uri_list);
                     phonebooklist.add(new_item);
                     LoadImages(new_item.getNumber(), phonebooklist.indexOf(new_item), new GetContactImagesCallback() {
                         @Override

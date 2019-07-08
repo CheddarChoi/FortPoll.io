@@ -31,6 +31,7 @@ import com.example.fake_book.RetrofitClient;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
@@ -155,8 +156,25 @@ public class AddContact extends AppCompatActivity {
     private void addContactImage(Uri uri){
         Retrofit retrofitClient = RetrofitClient.contactImagesRetrofitInstance();
         myService = retrofitClient.create(MyService.class);
-
-        File file = new File(getRealPathFromURI(uri,getApplicationContext()));
+        File file;
+        if (isPhotoLoaded == false){
+            file = new File(Environment.getExternalStorageDirectory() + "/Pictures","island.jpg");
+            try {
+                InputStream inputStream = getResources().openRawResource(+ R.drawable.island);
+                OutputStream out=new FileOutputStream(file);
+                byte buf[]=new byte[1024];
+                int len;
+                while((len=inputStream.read(buf))>0)
+                    out.write(buf,0,len);
+                out.close();
+                inputStream.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        else {
+            file = new File(getRealPathFromURI(uri, getApplicationContext()));
+        }
 
         RequestBody req = RequestBody.create(MediaType.parse("image/*"), file);
 
@@ -224,7 +242,6 @@ public class AddContact extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
         intent.setType("image/*");
-        isPhotoLoaded = true;
         startActivityForResult(intent, PICK_FROM_ALBUM);
     }
 
@@ -236,7 +253,6 @@ public class AddContact extends AppCompatActivity {
             if(camera_intent.resolveActivity(AddContact.this.getPackageManager()) != null){
                 File new_photo = createImageFile();
                 if(new_photo != null){
-                    isPhotoLoaded = true;
                     loadedPhoto_uri = FileProvider.getUriForFile(AddContact.this, AddContact.this.getPackageName(),new_photo);
                     camera_intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, loadedPhoto_uri);
                     startActivityForResult(camera_intent, PICK_FROM_CAMERA);
@@ -254,6 +270,7 @@ public class AddContact extends AppCompatActivity {
             Toast.makeText(AddContact.this, "result code: "+ resultCode, Toast.LENGTH_SHORT).show();
             return;
         }
+        isPhotoLoaded = true;
         switch (requestCode){
             case PICK_FROM_ALBUM : {
                 if(data.getData() != null)

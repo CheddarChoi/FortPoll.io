@@ -25,7 +25,7 @@
             android:id="@+id/card_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:scaleType="centerInside"
+            android:scaleType="centerCrop"
             card_view:srcCompat="@drawable/teamwork" />
         <!--
             android:layout_width="match_parent"

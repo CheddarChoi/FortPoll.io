@@ -10,12 +10,12 @@ public class Item {
     private Bitmap profile_pic;
     private ArrayList<Uri> photos;
 
-    public Item(String name, String number, String email, Bitmap profile_pic) {
+    public Item(String name, String number, String email, Bitmap profile_pic, ArrayList<Uri> photos) {
         this.name = name;
         this.number = number;
         this.email = email;
         this.profile_pic = profile_pic;
-        this.photos = new ArrayList<>();
+        this.photos = photos;
     }
 
     public String getName() {

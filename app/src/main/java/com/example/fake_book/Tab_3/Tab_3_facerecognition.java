@@ -97,7 +97,8 @@ public class Tab_3_facerecognition extends AppCompatActivity {
         System.out.println(loaded_photo_path);
         File image_file = new File(loaded_photo_path);
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bm = BitmapFactory.decodeFile(image_file.getAbsolutePath(),bmOptions);
+        bm = BitmapFactory.decodeFile(image_file.getAbsolutePath(), bmOptions);
+        bm = Bitmap.createScaledBitmap(bm, 300, bm.getHeight()*300/bm.getWidth(), true);
 
         //face recognition
         FaceDetector faceDetector = new FaceDetector.Builder(Tab_3_facerecognition.this).setTrackingEnabled(false).build();

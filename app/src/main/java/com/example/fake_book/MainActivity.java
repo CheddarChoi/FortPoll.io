@@ -1,5 +1,6 @@
 package com.example.fake_book;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -9,8 +10,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -29,6 +33,12 @@ import com.gun0912.tedpermission.TedPermission;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager pager;
     FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
     Bitmap user_image;
+    URL user_image_url;
     public static ArrayList<Item> phonebooklist;
     public static ArrayList<Uri> imagelist;
 
@@ -63,25 +74,13 @@ public class MainActivity extends AppCompatActivity {
         Bundle inBundle = intent.getExtras();
         String user_name = inBundle.get("name").toString();
         String user_id = inBundle.get("id").toString();
-        String user_image_url = inBundle.get("imageUrl").toString();
+        try {
+            user_image_url = new URL(inBundle.get("imageUrl").toString());
+            user_image = getBitmapFromUrl(user_image_url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         Toast.makeText(MainActivity.this,"Welcome, "+user_name, Toast.LENGTH_LONG).show();
-
-        Picasso.get().load(user_image_url).into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                user_image = bitmap;
-            }
-
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-            }
-        });
 
         pager = findViewById(R.id.pager);
 
@@ -101,9 +100,13 @@ public class MainActivity extends AppCompatActivity {
         mContext = this;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Drawable new_drawable = new BitmapDrawable(getResources(), user_image);
         getMenuInflater().inflate(R.menu.menu_with_logout, menu);
+        Menu mOptionsMenu = menu;
+        mOptionsMenu.findItem(R.id.profile).setIcon(new_drawable);
         return true;
     }
 
@@ -148,5 +151,27 @@ public class MainActivity extends AppCompatActivity {
                 .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,Manifest.permission.READ_CALL_LOG, Manifest.permission.READ_SMS)
                 .check();
 
+    }
+
+    private Bitmap getBitmapFromUrl(URL url){
+        try {
+            AsyncTask<URL, Void, Bitmap> asyncTask = new AsyncTask<URL, Void, Bitmap>() {
+                @Override
+                protected Bitmap doInBackground(URL... url) {
+                    try {
+                        return BitmapFactory.decodeStream(((URL) url[0]).openConnection().getInputStream());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            };
+
+            Bitmap bitmap = asyncTask.execute(url).get();
+            return bitmap;
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 }

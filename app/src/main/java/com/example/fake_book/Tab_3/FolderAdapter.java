@@ -2,6 +2,8 @@ package com.example.fake_book.Tab_3;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +67,9 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
     public void onBindViewHolder(@NonNull FolderAdapter.ViewHolder holder, int position) {
         if(folder_list.get(position).size() != 0){
             holder.card.img.setImageURI(this.folder_list.get(position).get(0));
+            Bitmap bitmap=((BitmapDrawable)holder.card.img.getDrawable()).getBitmap();
+            Bitmap resized = Bitmap.createScaledBitmap(bitmap, 200, bitmap.getHeight()*200/bitmap.getWidth(), true);
+            holder.card.img.setImageBitmap(resized);
             holder.card.uri = this.folder_list.get(position).get(0);
         }
         holder.card.name.setText(this.name_list.get(position));

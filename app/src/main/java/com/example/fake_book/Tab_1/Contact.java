@@ -12,12 +12,21 @@ public class Contact {
     @SerializedName("email")
     private String email;
     @SerializedName("photos")
-    private List<String> photos;
+    private List<String> photoPaths;
 
-    public Contact(String contactname, String contactphoneNumber, String contactemail) {
+    public Contact(String contactname, String contactphoneNumber, String contactemail, List<String> photoPaths) {
         this.name = contactname;
         this.phoneNumber = contactphoneNumber;
         this.email = contactemail;
+        this.photoPaths = photoPaths;
+    }
+
+    public void setPhotoPaths(List<String> photoPaths) {
+        this.photoPaths = photoPaths;
+    }
+
+    public List<String> getPhotoPaths() {
+        return photoPaths;
     }
 
     public String getName() {
