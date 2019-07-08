@@ -26,7 +26,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.fake_book.MainActivity;
+import com.example.fake_book.MyService;
 import com.example.fake_book.R;
+import com.example.fake_book.RetrofitClient;
 import com.example.fake_book.Tab_1.Item;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
@@ -42,6 +44,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+
 public class Tab_3_before_facerecognition extends AppCompatActivity {
 
     Button start_button;
@@ -53,6 +61,17 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
     ArrayList<Item> phonebooklist = MainActivity.phonebooklist;
 
     Uri selected_image_uri;
+
+    Retrofit retrofitClient;
+    MyService myService;
+
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    @Override
+    protected void onStop() {
+        compositeDisposable.clear();
+        super.onStop();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +94,7 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Tab_3_before_facerecognition.this, chooseImage.class);
-                startActivityForResult(intent,2);
+                startActivityForResult(intent, 2);
             }
         });
 
@@ -86,9 +105,8 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
                     Intent face_recognition = new Intent(Tab_3_before_facerecognition.this, Tab_3_facerecognition.class);
                     face_recognition.putExtra("photo_uri", selected_image_uri.toString());
                     startActivityForResult(face_recognition, 3);
-                }
-                else
-                    Toast.makeText(Tab_3_before_facerecognition.this,"Load Photo First!",Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(Tab_3_before_facerecognition.this, "Load Photo First!", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -126,7 +144,7 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 2 : {
+            case 2: {
                 if (resultCode == Activity.RESULT_OK) {
                     selected_image_uri = Uri.parse(data.getStringExtra("photo_uri"));
                     image.setImageURI(selected_image_uri);
@@ -135,12 +153,14 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
                 break;
             }
 
-            case 3 : {
+            case 3: {
                 if (resultCode == Activity.RESULT_OK) {
                     int[] result_array = data.getIntArrayExtra("result");
-                    for (int selected_person : result_array){
-                        if (selected_person != -1)
+                    for (int selected_person : result_array) {
+                        if (selected_person != -1) {
                             phonebooklist.get(selected_person).addPhoto(selected_image_uri);
+                            editContactPhotos(phonebooklist.get(selected_person).getNumber(), selected_image_uri.toString());
+                        }
                     }
                 }
                 Intent result = new Intent();
@@ -151,7 +171,7 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
         }
     }
 
-    private Bitmap imgRotate(Bitmap bmp){
+    private Bitmap imgRotate(Bitmap bmp) {
         int width = bmp.getWidth();
         int height = bmp.getHeight();
 
@@ -162,5 +182,21 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
         bmp.recycle();
 
         return resizedBitmap;
+    }
+
+    public void editContactPhotos(String phoneNumber, String photoPaths) {
+        retrofitClient = RetrofitClient.editContactRetrofitInstance();
+        myService = retrofitClient.create(MyService.class);
+
+        compositeDisposable.add(myService.editContact(phoneNumber, photoPaths)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String response) throws Exception {
+                        Toast.makeText(Tab_3_before_facerecognition.this, "" + response, Toast.LENGTH_SHORT).show();
+                    }
+                })
+        );
     }
 }

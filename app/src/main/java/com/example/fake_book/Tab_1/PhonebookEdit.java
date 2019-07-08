@@ -2,12 +2,20 @@ package com.example.fake_book.Tab_1;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,10 +28,13 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
 
+import com.example.fake_book.PhotoTools;
 import com.example.fake_book.R;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class PhonebookEdit extends AppCompatActivity {
@@ -56,18 +67,18 @@ public class PhonebookEdit extends AppCompatActivity {
         name = getIntent().getStringExtra("name");
         number = getIntent().getStringExtra("number");
         email = getIntent().getStringExtra("email");
-        /*bytes = getIntent().getByteArrayExtra("photo");
-        photo = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);*/
+        bytes = getIntent().getByteArrayExtra("photo");
+        photo = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
         edit_name = findViewById(R.id.edit_name);
         edit_number = findViewById(R.id.edit_number);
         edit_email = findViewById(R.id.edit_email);
-        /*ImageView_photo = findViewById(R.id.imageView_phonebook);*/
+        ImageView_photo = findViewById(R.id.imageView_phonebook);
 
         edit_name.setText(name);
         edit_number.setText(number);
         edit_email.setText(email);
-       /* ImageView_photo.setImageBitmap(photo);
+        ImageView_photo.setImageBitmap(photo);
 
         ImageView_photo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -85,7 +96,7 @@ public class PhonebookEdit extends AppCompatActivity {
                     Toast.makeText(getApplicationContext().getApplicationContext(), "new image", Toast.LENGTH_SHORT).show();
                 }
             }
-        });*/
+        });
     }
 
     @Override
@@ -95,7 +106,7 @@ public class PhonebookEdit extends AppCompatActivity {
         resultIntent.putExtra("name", edit_name.getText().toString());
         resultIntent.putExtra("number", edit_number.getText().toString());
         resultIntent.putExtra("email", edit_email.getText().toString());
-        /*resultIntent.putExtra("photo",bytes);*/
+        resultIntent.putExtra("photo",bytes);
         setResult(Activity.RESULT_OK, resultIntent);
         super.onBackPressed();
     }
@@ -152,7 +163,7 @@ public class PhonebookEdit extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // check which request we're responding to
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -179,11 +190,13 @@ public class PhonebookEdit extends AppCompatActivity {
                         img = Bitmap.createScaledBitmap(img, dstWidth, dstHeight, true);
                     }
 
-                    /*// show image
+                    img = PhotoTools.modifyOrientation(img, PhotoTools.getRealPathFromURI(fileUri, getApplicationContext()));
+
+                    // show image
                     ImageView_photo.setImageBitmap(img);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     img.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    bytes = stream.toByteArray();*/
+                    bytes = stream.toByteArray();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

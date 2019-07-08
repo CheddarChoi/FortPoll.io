@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,14 +26,15 @@ import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.example.fake_book.MyService;
+import com.example.fake_book.PhotoTools;
 import com.example.fake_book.R;
 import com.example.fake_book.RetrofitClient;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -92,7 +94,6 @@ public class addImage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (isPhotoLoaded) {
-                    System.out.println(loadedPhoto_uri);
                     uploadImage(loadedPhoto_uri);
                 }
                 else{
@@ -181,7 +182,6 @@ public class addImage extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode != Activity.RESULT_OK){
-            Toast.makeText(addImage.this, "result code: "+ resultCode, Toast.LENGTH_SHORT).show();
             return;
         }
         switch (requestCode){
@@ -207,7 +207,27 @@ public class addImage extends AppCompatActivity {
         } else {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), loadedPhoto_uri);
+                bitmap = PhotoTools.modifyOrientation(bitmap, getRealPathFromURI(loadedPhoto_uri, getApplicationContext()));
+
+                System.out.println(getRealPathFromURI(loadedPhoto_uri, getApplicationContext()));
+                File file = new File(getRealPathFromURI(loadedPhoto_uri, getApplicationContext()));
+                OutputStream out = null;
+                try {
+                    file.createNewFile();
+                    out = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                } catch (Exception e){
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 loadedPhoto.setImageBitmap(bitmap);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -234,25 +254,19 @@ public class addImage extends AppCompatActivity {
 
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), req);
 
-        //RequestBody description = RequestBody.create(MediaType.parse("text/plain"), "image/type");
-
         Call<ResponseBody> call = myService.addNewImage(body);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
                 if (response.code() == 200) {
                     Toast.makeText(addImage.this,"Uploaded Successfully!",Toast.LENGTH_SHORT).show();
                     finish();
                 }
-
-                Toast.makeText(getApplicationContext(), response.code() + " ", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                //Toast.makeText(addImage.this,"Uploading Failed!",Toast.LENGTH_SHORT).show();
                 Toast.makeText(addImage.this, t.getMessage(),Toast.LENGTH_SHORT).show();
             }
 
@@ -260,99 +274,9 @@ public class addImage extends AppCompatActivity {
         });
     }
     private String getRealPathFromURI(final Uri uri, final Context context) {
-
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
         if(Picked_from_camera == true) {
             return mCurrentPhotoPath;
         }
-
-        // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-                if ("primary".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
-                }
-                // TODO handle non-primary volumes
-            }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
-                final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-                return getDataColumn(context, contentUri, null, null);
-            }
-            // MediaProvider
-            else if (isMediaDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-                Uri contentUri = null;
-                if ("image".equals(type)) {
-                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                } else if ("video".equals(type)) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                } else if ("audio".equals(type)) {
-                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                }
-                final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
-                        split[1]
-                };
-                return getDataColumn(context, contentUri, selection, selectionArgs);
-            }
-        }
-        // MediaStore (and general)
-        else if ("content".equalsIgnoreCase(uri.getScheme())) {
-            // Return the remote address
-            if (isGooglePhotosUri(uri))
-                return uri.getLastPathSegment();
-            return getDataColumn(context, uri, null, null);
-        }
-        // File
-        else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
-        }
-        return null;
+        return PhotoTools.getRealPathFromURI(uri, context);
     }
-
-    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
-        Cursor cursor = null;
-        final String column = "_data";
-        final String[] projection = {column};
-
-        try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
-                    null);
-            if (cursor != null && cursor.moveToFirst()) {
-                final int index = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(index);
-            }
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        return null;
-    }
-
-    public static boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }
-
-    public static boolean isDownloadsDocument(Uri uri) {
-        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
-    }
-
-    public static boolean isMediaDocument(Uri uri) {
-        return "com.android.providers.media.documents".equals(uri.getAuthority());
-    }
-
-    public static boolean isGooglePhotosUri(Uri uri) {
-        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
-    }
-
 }

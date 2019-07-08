@@ -1,23 +1,24 @@
 package com.example.fake_book.Tab_2;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fake_book.MainActivity;
 import com.example.fake_book.R;
-import com.example.fake_book.Tab_1.AddContact;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
@@ -74,6 +75,32 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     context.startActivity(intent);
                 }
             });
+
+            card.img.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    AlertDialog.Builder oDialog = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert);
+                    oDialog.setMessage("사진을 삭제합니다.")
+                            .setTitle("Delete Photo")
+                            .setNegativeButton("Commit", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    MainActivity.imagelist.remove(card.index);
+                                    CardAdapter.this.notifyDataSetChanged();
+                                    Toast.makeText(context, "commit", Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toast.makeText(context, "cancel", Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .show();
+                    return true;
+                }
+            });
         }
     }
 
@@ -90,16 +117,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CardAdapter.ViewHolder holder, int position) {
-
-        Uri selected_photo_uri = this.mData.get(position);
-        System.out.println(selected_photo_uri);
-
-        Bitmap bitmap = Bitmap.createBitmap(200,200,Bitmap.Config.ARGB_8888);
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), selected_photo_uri);
-        } catch (IOException e) {
-            System.out.println("image안됨");
-        }
+        holder.card.img.setImageURI(this.mData.get(position));
+        Bitmap bitmap=((BitmapDrawable)holder.card.img.getDrawable()).getBitmap();
         Bitmap resized = Bitmap.createScaledBitmap(bitmap, 200, bitmap.getHeight()*200/bitmap.getWidth(), true);
         holder.card.img.setImageBitmap(resized);
         holder.card.index = position;

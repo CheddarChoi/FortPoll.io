@@ -30,6 +30,10 @@ public interface MyService {
     @POST("addContactImage")
     Call<ResponseBody> addContactImage (@Part MultipartBody.Part image);
 
+    @POST("editphotos")
+    @FormUrlEncoded
+    Observable<String> editContact (@Field("phoneNumber") String phoneNumber, @Field("photoPaths") String photoPaths);
+
     @Multipart
     @POST("upload")
     Call<ResponseBody> addNewImage (@Part MultipartBody.Part image);

@@ -2,6 +2,8 @@ package com.example.fake_book.Tab_1;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class Contact {
     @SerializedName("name")
     private String name;
@@ -9,6 +11,8 @@ public class Contact {
     private String phoneNumber;
     @SerializedName("email")
     private String email;
+    @SerializedName("photos")
+    private List<String> photos;
 
     public Contact(String contactname, String contactphoneNumber, String contactemail) {
         this.name = contactname;

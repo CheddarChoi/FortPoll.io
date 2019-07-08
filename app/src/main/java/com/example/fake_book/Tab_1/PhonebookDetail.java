@@ -111,7 +111,7 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
                 edit_intent.putExtra("name",name);
                 edit_intent.putExtra("number",number);
                 edit_intent.putExtra("email",email);
-                /*edit_intent.putExtra("photo",bytes);*/
+                edit_intent.putExtra("photo",bytes);
                 startActivityForResult(edit_intent, 2);
                 return true;
             case R.id.delete:
@@ -131,7 +131,7 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
         resultIntent.putExtra("name", name);
         resultIntent.putExtra("number", number);
         resultIntent.putExtra("email", email);
-        /*resultIntent.putExtra("photo",bytes);*/
+        resultIntent.putExtra("photo",bytes);
         setResult(Activity.RESULT_OK, resultIntent);
         super.onBackPressed();
     }
@@ -147,12 +147,12 @@ public class PhonebookDetail extends AppCompatActivity implements View.OnClickLi
                         name = data.getStringExtra("name");
                         number = data.getStringExtra("number");
                         email = data.getStringExtra("email");
-                        /*bytes = data.getByteArrayExtra("photo");
-                        photo = BitmapFactory.decodeByteArray(bytes,0,bytes.length);*/
+                        bytes = data.getByteArrayExtra("photo");
+                        photo = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                         textView_name.setText(name);
                         textView_number.setText(number);
                         textView_email.setText(email);
-                        /*ImageView_photo.setImageBitmap(photo);*/
+                        ImageView_photo.setImageBitmap(photo);
                     }
                 }
                 break;

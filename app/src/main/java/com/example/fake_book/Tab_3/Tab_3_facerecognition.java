@@ -97,7 +97,7 @@ public class Tab_3_facerecognition extends AppCompatActivity {
         System.out.println(loaded_photo_path);
         File image_file = new File(loaded_photo_path);
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        final Bitmap bm = BitmapFactory.decodeFile(image_file.getAbsolutePath(),bmOptions);
+        bm = BitmapFactory.decodeFile(image_file.getAbsolutePath(),bmOptions);
 
         //face recognition
         FaceDetector faceDetector = new FaceDetector.Builder(Tab_3_facerecognition.this).setTrackingEnabled(false).build();
@@ -175,6 +175,8 @@ public class Tab_3_facerecognition extends AppCompatActivity {
 
     // index에 해당하는 얼굴에 네모 그려서 Bitmap 반환
     public Bitmap draw_result (Bitmap original_image, int index) {
+        if (original_image == null)
+            System.out.println("WHAT???????");
         Bitmap tempBitmap = original_image.copy(Bitmap.Config.ARGB_8888, true);
 
         BitmapFactory.Options options = new BitmapFactory.Options();

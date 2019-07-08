@@ -51,9 +51,7 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
     RecyclerView recyclerView;
 
     //variables for fab animation
-    private FloatingActionButton fab, fab_img, fab_cam;
-    private Animation fab_open, fab_close, fab_rotate, fab_rotate_backward;
-    private Boolean isFabOpen = false;
+    private FloatingActionButton fab;
     ArrayList<Uri> imagelist;
     ArrayList<String> fileArray;
     private CardAdapter adapter;
@@ -81,47 +79,18 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
         GridLayoutManager mGridLayoutManager;
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(mGridLayoutManager);
-        adapter = new CardAdapter(imagelist, getContext()) ;
+        adapter = new CardAdapter(imagelist, getActivity()) ;
         recyclerView.setAdapter(adapter);
 
-        //variables for fab animations
-        fab_open = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_open);
-        fab_close = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_close);
-        fab_rotate = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_rotate);
-        fab_rotate_backward = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_rotate_backward);
-
         fab = view.findViewById(R.id.fab_menu);
-        fab_img = view.findViewById(R.id.fab_img);
-        fab_cam = view.findViewById(R.id.fab_cam);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //anim();
                 Intent intent = new Intent(getActivity(),addImage.class);
                 startActivityForResult(intent, 1);
             }
         });
-
-        /*fab_img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                anim();
-                selectAlbum();
-                (adapter).notifyDataSetChanged();
-                recyclerView.smoothScrollToPosition(Integer.MAX_VALUE);
-            }
-        });
-
-        fab_cam.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                anim();
-                takePhoto();
-                (adapter).notifyDataSetChanged();
-                recyclerView.smoothScrollToPosition(Integer.MAX_VALUE);
-            }
-        });*/
 
         return view;
     }
@@ -137,7 +106,6 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
 
         switch (requestCode){
             case PICK_FROM_ALBUM : {
-                //앨범에서 가져오기
                 if(data.getData()!=null){
                     try{
                         photoURI = data.getData();
@@ -159,24 +127,6 @@ public class Tab_2 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
                 }
                 break;
             }
-        }
-    }
-
-    public void anim() {
-        if (isFabOpen) {
-            fab_cam.startAnimation(fab_close);
-            fab_img.startAnimation(fab_close);
-            fab_cam.setClickable(false);
-            fab_img.setClickable(false);
-            fab.startAnimation(fab_rotate_backward);
-            isFabOpen = false;
-        } else {
-            fab_cam.startAnimation(fab_open);
-            fab_img.startAnimation(fab_open);
-            fab_cam.setClickable(true);
-            fab_img.setClickable(true);
-            fab.startAnimation(fab_rotate);
-            isFabOpen = true;
         }
     }
 
