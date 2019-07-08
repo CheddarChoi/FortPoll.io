@@ -40,12 +40,13 @@ public interface MyService {
     Call<List<Contact>> getContacts();
 
     @Multipart
+    @POST("addContactImage")
+    Call<ResponseBody> addContactImage (@Part MultipartBody.Part image);
+
+    @Multipart
     @POST("upload")
     Call<ResponseBody> addNewImage (@Part MultipartBody.Part image);
 
     @GET("getImages")
     Call<List<Images>> getImages();
-
-    @GET("getImage/:{filename}")
-    Call<Image> getImage(@Path("filename") String imageName);
 }

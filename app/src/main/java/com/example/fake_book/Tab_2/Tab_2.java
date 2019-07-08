@@ -120,6 +120,7 @@ public class Tab_2 extends Fragment {
                     @Override
                     public void onGetImagesData(List<Images> images) {
                         imagelist.clear();
+                        fileArray.clear();
 
                         fileArray = new ArrayList<>();
                         System.out.println(images);

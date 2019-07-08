@@ -1,89 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:weightSum="4"
     tools:context=".MainActivity">
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_weight="2"
-        android:layout_width="match_parent"
-        android:layout_height="0dp">
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/topPanel">
-            <ImageView
-                android:src="@drawable/pexels_photo_949587"
-                android:scaleType="fitXY"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/txt_create_account"
-                android:text="FIND CONTACT"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_margin="16dp"/>
-        </FrameLayout>
-    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="180dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/pexels_photo_949587"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txt_create_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:text="FIND CONTACT"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/linearLayout3"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/roundcorner_addcontact"
         android:orientation="vertical"
-        android:background="@android:color/white"
-        android:layout_margin="16dp"
-        android:padding="16dp">
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.56"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_contactImage">
+
         <EditText
             android:id="@+id/edt_name"
-            android:layout_width="match_parent"
+            android:layout_width="315dp"
             android:layout_height="wrap_content"
             android:hint="Name"
             android:inputType="textPersonName" />
+
         <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/item_phonenumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/item_phonenumber"
             android:hint="Phone Number"
             android:inputType="text|phone"
-            app:met_textColorHint="@color/myTextColor"
             app:met_baseColor="@color/myTextColor"
-            app:met_primaryColor="@color/myTextColor"
             app:met_iconPadding="0dp"
-            app:met_iconRight="@drawable/baseline_phone_black_48dp"/>
+            app:met_iconRight="@drawable/baseline_phone_black_48dp"
+            app:met_primaryColor="@color/myTextColor"
+            app:met_textColorHint="@color/myTextColor" />
 
 
         <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/edt_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/edt_email"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            app:met_textColorHint="@color/myTextColor"
             app:met_baseColor="@color/myTextColor"
-            app:met_primaryColor="@color/myTextColor"
             app:met_iconPadding="0dp"
-            app:met_iconRight="@drawable/baseline_email_black_48dp"/>
+            app:met_iconRight="@drawable/baseline_email_black_48dp"
+            app:met_primaryColor="@color/myTextColor"
+            app:met_textColorHint="@color/myTextColor" />
 
 
     </LinearLayout>
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/btn_addcontact"
-        android:layout_margin="16dp"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="342dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="32dp"
         android:background="#431F63"
         android:text="ADD CONTACT"
-        android:textSize="20sp"
         android:textColor="@android:color/white"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+
+    <Button
+        android:id="@+id/btn_contactImage"
+        android:layout_width="146dp"
+        android:layout_height="122dp"
+        android:layout_marginStart="132dp"
+        android:layout_marginLeft="132dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/roundbutton"
+        android:drawableTop="@drawable/baseline_add_photo_alternate_black_18dp"
+        android:gravity="center"
+        android:hapticFeedbackEnabled="false"
+        android:hint="Upload Image Here..."
+        android:paddingTop="23dp"
+        android:paddingBottom="30dp"
+        android:shadowColor="#00E9D4D4"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/contact_imageview"
+        android:background="@drawable/roundbutton"
+        android:layout_width="146dp"
+        android:layout_height="122dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
 
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
