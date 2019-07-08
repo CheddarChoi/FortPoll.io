@@ -15,6 +15,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -32,6 +33,8 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,7 +47,6 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
     ImageView image;
     Context context;
     boolean isPhotoLoaded = false;
-    Bitmap bm;
 
     ArrayList<Item> phonebooklist = MainActivity.phonebooklist;
 
@@ -91,8 +93,12 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
         rotate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                bm = imgRotate(bm);
-                image.setImageBitmap(bm);
+                Drawable drawable = image.getDrawable();
+                BitmapDrawable bitmapDrawable = ((BitmapDrawable) drawable);
+                Bitmap bitmap = bitmapDrawable.getBitmap();
+
+                bitmap = imgRotate(bitmap);
+                image.setImageBitmap(bitmap);
             }
         });
     }
@@ -105,15 +111,8 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
             case 2 : {
                 if (resultCode == Activity.RESULT_OK) {
                     selected_image_uri = Uri.parse(data.getStringExtra("photo_uri"));
-                    try {
-                        bm = MediaStore.Images.Media.getBitmap(getContentResolver(), selected_image_uri);
-                        image.setImageBitmap(bm);
-                        isPhotoLoaded = true;
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    image.setImageURI(selected_image_uri);
+                    isPhotoLoaded = true;
                 }
                 break;
             }
@@ -143,14 +142,6 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
 
         Bitmap resizedBitmap = Bitmap.createBitmap(bmp, 0, 0, width, height, matrix, true);
         bmp.recycle();
-
-        OutputStream os = null;
-        try {
-            os = getApplicationContext().getContentResolver().openOutputStream(selected_image_uri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        resizedBitmap.compress(Bitmap.CompressFormat.PNG,100,os);
 
         return resizedBitmap;
     }

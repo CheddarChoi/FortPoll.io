@@ -16,6 +16,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.SparseArray;
 import android.view.View;
@@ -32,7 +33,10 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class Tab_3_facerecognition extends AppCompatActivity {
@@ -91,85 +95,84 @@ public class Tab_3_facerecognition extends AppCompatActivity {
         next_button = findViewById(R.id.next_button);
         image = findViewById(R.id.imageView_recognition);
 
-        Uri loaded_photo_uri = Uri.parse(getIntent().getStringExtra("photo_uri"));
-        try {
-            bm = MediaStore.Images.Media.getBitmap(getContentResolver(), loaded_photo_uri);
+        String loaded_photo_path = Uri.parse(getIntent().getStringExtra("photo_uri")).getPath();
+        System.out.println(loaded_photo_path);
+        File image_file = new File(loaded_photo_path);
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        final Bitmap bm = BitmapFactory.decodeFile(image_file.getAbsolutePath(),bmOptions);
 
-            //face recognition
-            FaceDetector faceDetector = new FaceDetector.Builder(Tab_3_facerecognition.this).setTrackingEnabled(false).build();
-            if(!faceDetector.isOperational()){
-                Toast.makeText(Tab_3_facerecognition.this,"Could not set up face detector!", Toast.LENGTH_LONG).show();
-                return;
-            }
-            Frame frame = new Frame.Builder().setBitmap(bm).build();
-            faces = faceDetector.detect(frame);
-
-            result_array = new int[faces.size()];
-            for (int i=0 ; i<result_array.length ; i++)
-                result_array[i] = -1;
-
-            if (faces.size() == 0)  {
-                Toast.makeText(Tab_3_facerecognition.this, "No face found!", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            STROKE_WIDTH = bm.getWidth()/300;
-            TEXT_SIZE = bm.getWidth()/30;
-
-            //Paints
-            myRectPaint = new Paint();
-            myRectPaint.setStrokeWidth(STROKE_WIDTH);
-            myRectPaint.setColor(Color.parseColor("#FFFF9800"));
-            myRectPaint.setStyle(Paint.Style.STROKE);
-
-            myRectPaint_white = new Paint();
-            myRectPaint_white.setStrokeWidth(STROKE_WIDTH);
-            myRectPaint_white.setColor(Color.WHITE);
-            myRectPaint_white.setStyle(Paint.Style.STROKE);
-
-            myTextPaint = new Paint();
-            myTextPaint.setAntiAlias(true);
-            myTextPaint.setStyle(Paint.Style.FILL);
-            myTextPaint.setColor(Color.parseColor("#FFFF9800"));
-            myTextPaint.setTextSize(TEXT_SIZE);
-
-            myTextPaint_white = new Paint();
-            myTextPaint_white.setAntiAlias(true);
-            myTextPaint_white.setStyle(Paint.Style.FILL);
-            myTextPaint_white.setColor(Color.WHITE);
-            myTextPaint_white.setTextSize(TEXT_SIZE);
-
-            image.setImageBitmap(draw_result(bm,index));
-
-            next_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (index == faces.size()-1){
-                        Intent result = new Intent();
-                        result.putExtra("result",result_array);
-                        setResult(RESULT_OK,result);
-                        finish();
-                    }
-                    else {
-                        index++;
-                        image.setImageBitmap(draw_result(bm, index));
-                    }
-                }
-            });
-            prev_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (index == 0)
-                        Toast.makeText(Tab_3_facerecognition.this, "First Face!",Toast.LENGTH_LONG).show();
-                    else {
-                        index--;
-                        image.setImageBitmap(draw_result(bm, index));
-                    }
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+        //face recognition
+        FaceDetector faceDetector = new FaceDetector.Builder(Tab_3_facerecognition.this).setTrackingEnabled(false).build();
+        if(!faceDetector.isOperational()){
+            Toast.makeText(Tab_3_facerecognition.this,"Could not set up face detector!", Toast.LENGTH_LONG).show();
+            return;
         }
+        Frame frame = new Frame.Builder().setBitmap(bm).build();
+        faces = faceDetector.detect(frame);
+
+        result_array = new int[faces.size()];
+        for (int i=0 ; i<result_array.length ; i++)
+            result_array[i] = -1;
+
+        if (faces.size() == 0)  {
+            Toast.makeText(Tab_3_facerecognition.this, "No face found!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        STROKE_WIDTH = bm.getWidth()/300;
+        TEXT_SIZE = bm.getWidth()/30;
+
+        //Paints
+        myRectPaint = new Paint();
+        myRectPaint.setStrokeWidth(STROKE_WIDTH);
+        myRectPaint.setColor(Color.parseColor("#FFFF9800"));
+        myRectPaint.setStyle(Paint.Style.STROKE);
+
+        myRectPaint_white = new Paint();
+        myRectPaint_white.setStrokeWidth(STROKE_WIDTH);
+        myRectPaint_white.setColor(Color.WHITE);
+        myRectPaint_white.setStyle(Paint.Style.STROKE);
+
+        myTextPaint = new Paint();
+        myTextPaint.setAntiAlias(true);
+        myTextPaint.setStyle(Paint.Style.FILL);
+        myTextPaint.setColor(Color.parseColor("#FFFF9800"));
+        myTextPaint.setTextSize(TEXT_SIZE);
+
+        myTextPaint_white = new Paint();
+        myTextPaint_white.setAntiAlias(true);
+        myTextPaint_white.setStyle(Paint.Style.FILL);
+        myTextPaint_white.setColor(Color.WHITE);
+        myTextPaint_white.setTextSize(TEXT_SIZE);
+
+        image.setImageBitmap(draw_result(bm,index));
+
+        next_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (index == faces.size()-1){
+                    Intent result = new Intent();
+                    result.putExtra("result",result_array);
+                    setResult(RESULT_OK,result);
+                    finish();
+                }
+                else {
+                    index++;
+                    image.setImageBitmap(draw_result(bm, index));
+                }
+            }
+        });
+        prev_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (index == 0)
+                    Toast.makeText(Tab_3_facerecognition.this, "First Face!",Toast.LENGTH_LONG).show();
+                else {
+                    index--;
+                    image.setImageBitmap(draw_result(bm, index));
+                }
+            }
+        });
     }
 
     // index에 해당하는 얼굴에 네모 그려서 Bitmap 반환
@@ -202,5 +205,17 @@ public class Tab_3_facerecognition extends AppCompatActivity {
             }
         }
         return (new BitmapDrawable(getResources(), tempBitmap)).getBitmap();
+    }
+
+    public Uri save_NewImage(Bitmap inImage, String filename) throws IOException {
+        File new_image = new File(getStoragePath(), filename);
+        new_image.createNewFile();
+        FileOutputStream out = new FileOutputStream(new_image);
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        return Uri.parse(new_image.getPath());
+    }
+
+    public String getStoragePath() {
+        return getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString();
     }
 }
