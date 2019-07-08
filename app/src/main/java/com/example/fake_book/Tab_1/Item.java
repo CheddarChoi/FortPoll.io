@@ -1,6 +1,10 @@
 package com.example.fake_book.Tab_1;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+
+import com.example.fake_book.R;
 
 public class Item {
     private String name, number, email;
@@ -10,7 +14,7 @@ public class Item {
         this.name = name;
         this.number = number;
         this.email = email;
-        this.profile_pic = null;
+        this.profile_pic = Bitmap.createBitmap(100,100,Bitmap.Config.ARGB_8888);
     }
 
     public Bitmap getProfile_pic() {

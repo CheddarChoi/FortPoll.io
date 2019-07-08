@@ -24,12 +24,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fake_book.MyService;
 import com.example.fake_book.R;
 import com.example.fake_book.RetrofitClient;
+import com.example.fake_book.Tab_2.Tab_2;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -48,7 +50,6 @@ public class Tab_1 extends Fragment {
     private LinearLayoutManager mLinearLayoutManager;
     ArrayList<Contact> mContact;
     ArrayList<Item> phonebooklist;
-    ArrayList<Bitmap> phonebookPhotolist;
 
     private FloatingActionButton menu, read_contacts, add_contacts, deleteAll;
     boolean isMenuOpen = false;
@@ -65,7 +66,6 @@ public class Tab_1 extends Fragment {
         View rootView = inflater.inflate(R.layout.tab_1_main, container, false);
 
         phonebooklist = new ArrayList<>();
-        phonebookPhotolist = new ArrayList<>();
 
         mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
@@ -94,26 +94,26 @@ public class Tab_1 extends Fragment {
             @Override
             public void onClick(View view){
                 phonebooklist.clear();
-                phonebookPhotolist.clear();
                 LoadContacts(new GetDataCallback() {
                     @Override
                     public void onGetContactsData(List<Contact> contacts) {
                         assert contacts != null;
-                        for(int i = 0; i<contacts.size() ; i++){
-                            Contact c = contacts.get(i);
-                            System.out.println(c.getEmail()+" "+c.getName()+" "+c.getPhoneNumber());
+                        for(Contact c : contacts){
                             mContact.add(new Contact(c.getName(), c.getPhoneNumber(), c.getEmail()));
                             System.out.println(mContact.size());
                             Item new_item =new Item(c.getName(), c.getPhoneNumber(), c.getEmail());
-                            /*new contactPhoto().execute("http://143.248.39.96:4000/getImage/"+c.getPhoneNumber()+".jpg");
-                            new_item.setProfile_pic(phonebookPhotolist.get(i));*/
                             phonebooklist.add(new_item);
+                            LoadImages(new_item.getNumber(), phonebooklist.indexOf(new_item), new GetContactImagesCallback() {
+                                @Override
+                                public void onGetContactImagesData(Bitmap photos) {
+                                }
+                                @Override
+                                public void onError() {
+                                }
+                            });
                         }
                         Log.d(TAG, "ALL CONTACTS LOADED");
                         phonebookadapter.notifyDataSetChanged();
-                        System.out.println(phonebookadapter.getItemCount());
-                        System.out.println(mContact.size());
-                        System.out.println(phonebooklist.size());
                     }
                     @Override
                     public void onError() {
@@ -132,6 +132,11 @@ public class Tab_1 extends Fragment {
         });
 
         return rootView;
+    }
+
+    public interface GetContactImagesCallback{
+        void onGetContactImagesData(Bitmap photos);
+        void onError();
     }
 
     public interface GetDataCallback {
@@ -168,37 +173,35 @@ public class Tab_1 extends Fragment {
         });
     }
 
-    /*private class contactPhoto extends AsyncTask<String, String, Bitmap> {
+    public void LoadImages(String phoneNumber, int index, final GetContactImagesCallback getContactImagesCallback){
+        new contactPhoto().execute("http://143.248.39.96:4000/getContactImage/"+ phoneNumber +".jpg", ""+index);
+    }
 
+    private class contactPhoto extends AsyncTask<String, String, Bitmap> {
         Bitmap mBitmap;
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
         }
-
         protected Bitmap doInBackground(String... args) {
             try {
                 mBitmap = BitmapFactory
                         .decodeStream((InputStream) new URL(args[0])
                                 .getContent());
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
+            int index = Integer.parseInt(args[1]);
+            phonebooklist.get(index).setProfile_pic(mBitmap);
+
             return mBitmap;
         }
-
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            phonebookPhotolist.add(bitmap);
-            int index = phonebookPhotolist.size();
-            Item item = phonebooklist.get(index);
-            item.setProfile_pic(bitmap);
-            phonebooklist.set(index, item);
+            phonebookadapter.notifyDataSetChanged();
         }
-    }*/
+    }
 
 
     private void menuOpen(){

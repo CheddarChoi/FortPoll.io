@@ -119,8 +119,8 @@ public class Tab_2 extends Fragment {
                 download_Images(new GetImagesCallback(){
                     @Override
                     public void onGetImagesData(List<Images> images) {
-                        imagelist.clear();
-                        fileArray.clear();
+                        if (imagelist != null) imagelist.clear();
+                        if (fileArray != null) fileArray.clear();
 
                         fileArray = new ArrayList<>();
                         System.out.println(images);
@@ -226,6 +226,8 @@ public class Tab_2 extends Fragment {
             isFabOpen = true;
         }
     }
+
+
 
     private class LoadImage extends AsyncTask<String, String, Bitmap> {
 

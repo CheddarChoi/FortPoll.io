@@ -56,7 +56,7 @@ public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.View
         public TextView number;
         public ViewHolder(View view) {
             super(view);
-            profilepic = view.findViewById(R.id.contact_imageview);
+            profilepic = view.findViewById(R.id.image);
             name = view.findViewById(R.id.item_name);
             number = view.findViewById(R.id.item_phonenumber);
         }
@@ -71,12 +71,9 @@ public class PhonebookAdapter extends RecyclerView.Adapter<PhonebookAdapter.View
 
     @Override
     public void onBindViewHolder(@NotNull ViewHolder viewHolder, int position) {
-        Glide.with(mContext)
-                .asBitmap()
-                .load(mList.get(position).getProfile_pic())
-                .into(viewHolder.profilepic);
         viewHolder.name.setText(mList.get(position).getName());
         viewHolder.number.setText(mList.get(position).getNumber());
+        viewHolder.profilepic.setImageBitmap(mList.get(position).getProfile_pic());
     }
 
     @Override
