@@ -118,8 +118,8 @@ public class Tab_3_facerecognition extends AppCompatActivity {
             return;
         }
 
-        STROKE_WIDTH = bm.getWidth()/300;
-        TEXT_SIZE = bm.getWidth()/30;
+        STROKE_WIDTH = bm.getWidth()/200;
+        TEXT_SIZE = bm.getWidth()/20;
 
         //Paints
         myRectPaint = new Paint();

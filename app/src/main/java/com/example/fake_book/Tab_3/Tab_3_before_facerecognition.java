@@ -194,7 +194,6 @@ public class Tab_3_before_facerecognition extends AppCompatActivity {
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String response) throws Exception {
-                        Toast.makeText(Tab_3_before_facerecognition.this, "" + response, Toast.LENGTH_SHORT).show();
                     }
                 })
         );

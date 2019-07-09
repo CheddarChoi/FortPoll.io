@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,12 +31,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.example.fake_book.MyService;
 import com.example.fake_book.PhotoTools;
 import com.example.fake_book.R;
+import com.example.fake_book.RetrofitClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 public class PhonebookEdit extends AppCompatActivity {
     EditText edit_name, edit_number, edit_email;
@@ -48,6 +57,16 @@ public class PhonebookEdit extends AppCompatActivity {
 
     final int MY_PERMISSIONS_REQUEST_ALBUM = 100;
     final int PIXEL_THRESHOLD = 500;
+
+    Retrofit retrofitClient;
+    MyService myService;
+
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    @Override
+    protected void onStop(){
+        compositeDisposable.clear();
+        super.onStop();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +120,7 @@ public class PhonebookEdit extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        editContact(edit_name.getText().toString(), edit_number.getText().toString(), edit_email.getText().toString());
         Intent resultIntent = new Intent();
         resultIntent.putExtra("isEdit", isEdit);
         resultIntent.putExtra("name", edit_name.getText().toString());
@@ -203,5 +223,21 @@ public class PhonebookEdit extends AppCompatActivity {
             }
 
         }
+    }
+
+    public void editContact(String name, String phoneNumber, String email){
+        Retrofit retrofitClient = RetrofitClient.ContactsRetrofitInstance();
+        myService = retrofitClient.create(MyService.class);
+
+        compositeDisposable.add(myService.editContact(name, phoneNumber, email)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String response) throws Exception {
+                        Log.d("PHONEBOOKEDIT", ""+response);
+                    }
+                })
+        );
     }
 }

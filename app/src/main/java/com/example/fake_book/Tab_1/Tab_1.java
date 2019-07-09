@@ -105,6 +105,7 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
                         .setNegativeButton("Commit", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                deleteContact(phonebooklist.get(position).getNumber());
                                 phonebooklist.remove(position);
                                 phonebookadapter.notifyDataSetChanged();
                                 Toast.makeText(getContext(), "commit", Toast.LENGTH_LONG).show();
@@ -267,6 +268,26 @@ public class Tab_1 extends Fragment implements SwipeRefreshLayout.OnRefreshListe
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void deleteContact(String phoneNumber){
+        retrofit = RetrofitClient.ContactsRetrofitInstance();
+        myService = retrofit.create(MyService.class);
+
+        Call<String> call = myService.deleteContact(phoneNumber);
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NotNull Call<String> call, @NotNull Response<String> response) {
+                Toast.makeText(getContext(), "Contact Deleted...", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                //Something went wrong with the communication with the server or processing the Response or JSON doesn't fit to whatever we are trying to parser into.
+                Log.d(TAG, t.getMessage());
+            }
+        });
+
     }
 }
 

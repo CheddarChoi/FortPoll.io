@@ -34,6 +34,16 @@ public interface MyService {
     @FormUrlEncoded
     Observable<String> editContact (@Field("phoneNumber") String phoneNumber, @Field("photoPaths") String photoPaths);
 
+    @POST("delete")
+    @FormUrlEncoded
+    Call<String> deleteContact(@Field("phoneNumber") String phoneNumber);
+
+    @POST("editContact")
+    @FormUrlEncoded
+    Observable<String> editContact (@Field("name") String name,
+                                    @Field("phoneNumber") String phoneNumber,
+                                    @Field("email") String email);
+
     @Multipart
     @POST("upload")
     Call<ResponseBody> addNewImage (@Part MultipartBody.Part image);
