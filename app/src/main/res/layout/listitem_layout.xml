@@ -1,36 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-    android:padding="15dp"
-    android:id="@+id/parent_layout">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/listitem_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="70dp"
-        android:layout_height="70dp"
         android:id="@+id/image"
-        android:src="@mipmap/ic_launcher" />
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/island"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Name"
         android:id="@+id/item_name"
-        android:layout_toRightOf="@+id/image"
-        android:textColor="#000"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="40dp"
-        android:textSize="23sp"/>
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Phone Number"
-        android:id="@+id/item_phonenumber"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
         android:layout_toRightOf="@+id/image"
-        android:textColor="#696969"
-        android:layout_marginTop="47dp"
-        android:layout_marginLeft="40dp"
-        android:textSize="15sp"/>
+        android:text="Name"
+        android:textColor="#000"
+        android:textSize="23sp"
+        app:fontFamily="@font/josefin_sans"
+        app:layout_constraintStart_toEndOf="@+id/image"
+        app:layout_constraintTop_toTopOf="@+id/image" />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/item_phonenumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_toRightOf="@+id/image"
+        android:text="Phone Number"
+        android:textColor="#696969"
+        android:textSize="15sp"
+        app:fontFamily="@font/josefin_sans"
+        app:layout_constraintBottom_toBottomOf="@+id/image"
+        app:layout_constraintStart_toEndOf="@+id/image" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

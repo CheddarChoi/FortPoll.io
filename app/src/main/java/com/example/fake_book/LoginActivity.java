@@ -4,26 +4,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenManager;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import org.json.JSONObject;
-
-import java.util.Arrays;
-
 
 public class LoginActivity extends AppCompatActivity {
     private Context mContext;
@@ -35,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
         mContext = getApplicationContext();
 
@@ -46,19 +45,31 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
+        profileTracker = new ProfileTracker() {
+            @Override
+            protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
+                nextActivity(newProfile);
+            }
+        };
+
+        accessTokenTracker.startTracking();
+        profileTracker.startTracking();
+
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
+
+        if (isLoggedIn) {
+            nextActivity(Profile.getCurrentProfile());
+        }
+
         btn_facebook_login = findViewById(R.id.btn_facebook_login);
-        btn_facebook_login.setReadPermissions(Arrays.asList("public_profile", "email"));
         btn_facebook_login.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
 
             // 로그인 성공 시 호출 됩니다. Access Token 발급 성공.
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.e("Callback :: ", "onSuccess");
-                JSONObject user_info = requestMe(loginResult.getAccessToken());
-
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("user_info", user_info.toString());
-                startActivity(intent);
+                Profile profile = Profile.getCurrentProfile();
+                nextActivity(profile);
             }
 
             // 로그인 창을 닫을 경우, 호출됩니다.
@@ -94,9 +105,49 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onResume(){
+        super.onResume();
+        Profile profile = Profile.getCurrentProfile();
+        nextActivity(profile);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        accessTokenTracker.stopTracking();
+        profileTracker.startTracking();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        mCallbackManager.onActivityResult(requestCode, resultCode, intent);
+    }
+
+    private void nextActivity(Profile profile){
+        if (profile != null){
+            Intent main = new Intent(LoginActivity.this, MainActivity.class);
+            main.putExtra("name", profile.getName());
+            main.putExtra("id", profile.getId());
+            main.putExtra("imageUrl", profile.getProfilePictureUri(200,200).toString());
+            startActivity(main);
+        }
+    }
+
+    // 뒤로가기 버튼을 두번 연속으로 눌러야 종료되게끔 하는 메소드
+    private long time= 0;
+    @Override
+    public void onBackPressed(){
+        if(System.currentTimeMillis()-time>=2000){
+            time=System.currentTimeMillis();
+            Toast.makeText(getApplicationContext(),"뒤로 버튼을 한번 더 누르면 종료합니다.",Toast.LENGTH_SHORT).show();
+        }else if(System.currentTimeMillis()-time<2000){
+            ActivityCompat.finishAffinity(LoginActivity.this);
+        }
+    }
 }

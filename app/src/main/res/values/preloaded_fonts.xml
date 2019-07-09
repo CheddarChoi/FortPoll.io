@@ -6,5 +6,7 @@
         <item>@font/josefin_sans_bold</item>
         <item>@font/merriweather</item>
         <item>@font/merriweather_bold</item>
+        <item>@font/raleway</item>
+        <item>@font/raleway_bold</item>
     </array>
 </resources>
